@@ -30,7 +30,7 @@ UofT E-mail Address: ra.gupta@mail.utoronto.ca
 
 Project Details
 ---------------
-Project Title: Super Awsome Totally not Boring notepad. 
+Project Title: Notepad--
 
 Project Description: A notepad style machine which translates keyboard input onto a VGA monitor.
 
@@ -45,17 +45,40 @@ Proposal
 --------
 
 What do you plan to have completed by the end of the first lab session?:
+The ASIC will have the ability to print simple characters (A-Z, 
+0-9) through the VGA in arbitrary positions using switches on 
+the DE2 as input. Each character will fill the same dimensions, 
+with no kerning, spacing or vertical alignment encoded. The 
+colour or each character may also be selected.
 
 What do you plan to have completed by the end of the second lab session?:
+The ASIC  will now accept individual characters with no position 
+information and print them through the VGA to the next available 
+position, beginning from the top-left corner, and proceeding in 
+normal latin left-to-right then top-to-bottom order. 
+Additionally, instead of taking input from the DE2 switches, the 
+ASIC will now take input from a keyboard connected via the DE2's 
+PS/2 port.
 
 What do you plan to have completed by the end of the third lab session?:
+The ASIC will now be capable of overwriting previous characters 
+displayed on the screen, using the Backspace key, as well as 
+posess carriage return / line feed functionality. Time-
+dependant, additional features that could be included are:
+- A flashing cursor to enable overwriting at the selected position (navigation with arrow keys)
+- Rudimentary line-copy and line-paste
+- The ability to write special characters, such braces, brackets, colons, etc.
+- ^The same, with lowercase letters
+- Multiple 'pages', scrolling
 
 What is your backup plan if things don’t work out as planned?
+As this project has many features that are not necessary for a 
+rudimentary text editor, each can be omitted, if time is overly 
+constrained.
 
 What hardware will you need beyond the DE2 board 
-(be sure to e-mail Brian if it’s anything beyond the basics to make sure there’s enough to go around)
-
-VGA monitor and keyboard
+In addition to a display with VGA input,  a keyboard with PS/2 
+output  is required for this project.
 
 Motivations
 -----------
