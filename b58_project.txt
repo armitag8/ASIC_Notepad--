@@ -7,38 +7,38 @@ Last Name: Armitage
 Student Number: 999030141
 UofT E-mail Address: joe.armitage@mail.utoronto.ca
 
-
 Team Member B
 -------------
-First Name: Greg
-Last Name: Mehdihev
-Student Number: 1003316066
-UofT E-mail Address: greg.mehdiyev@mail.utoronto.ca
+First Name: Robert
+Last Name: Augustynowicz
+Student Number: 1003511078
+UofT E-mail Address: robert.augustynowicz@mail.utoronto.ca
 
-Team Member C (Optional)
+Team Member C 
 -------------
-First Name: Mustafa
-Last Name: Quraish
-Student Number: IDK
-UofT E-mail Address: IDK
+First Name: Dax
+Last Name: Patel
+Student Number: 1003587040
+UofT E-mail Address: dax.patel@mail.utoronto.ca
 
-Team Member D (Optional)
+Team Member D 
 -------------
-First Name: 
-Last Name:
-Student Number:
-UofT E-mail Address:
+First Name: Rahul
+Last Name: Gupta
+Student Number: 1002353589
+UofT E-mail Address: ra.gupta@mail.utoronto.ca
 
 Project Details
 ---------------
-Project Title: We-PU
+Project Title: Super Awsome Totally not Boring notepad. 
 
-Project Description: A MIPS32-compliant CPU with 32x 32-bit registers
+Project Description: A notepad style machine which translates keyboard input onto a VGA monitor.
 
-Video URL: https://youtu.be/IDK
+Video URL: 
 
 Code URL (please upload a copy of this file to your repository at the end of the project as well, it will
-serve as a useful resource for future development): https://github.com/armitag8/cscb58FinalProjectWe-PU.git 
+serve as a useful resource for future development): https://github.com/armitag8/ASIC_Notepad--
+ 
 
 
 Proposal
@@ -54,6 +54,8 @@ What is your backup plan if things don’t work out as planned?
 
 What hardware will you need beyond the DE2 board 
 (be sure to e-mail Brian if it’s anything beyond the basics to make sure there’s enough to go around)
+
+VGA monitor and keyboard
 
 Motivations
 -----------
