@@ -83,6 +83,11 @@ output  is required for this project.
 Motivations
 -----------
 How does this project relate to the material covered in CSCB58?:
+This project will make use of a storage system to keep the location and value of characters written on the VGA moniter.
+There will be a ALU for the overall machine which will calulate the next position for the character to be written. 
+Also a display module will need to be created in order to translate information to the vga,
+as well as a module to translate input which is given throught the keyboard. Finally this will be controlled by a finite state machine
+for the entire process of displaying new characters onto the monitor.
 
 Why is this project interesting/cool (for CSCB58 students, and for non CSCB58 students?):
 
@@ -90,16 +95,10 @@ Why did you personally choose this project?:
 
 Attributions
 ------------
-Provide a complete list of any external resources your project used (attributions should also be included in your
-code).  
+
 
 Updates
 -------
 
-<Example update. Delte this and add your own updates after each lab session>
-Week 1: We built the hardware and tested the sensors. The distance sensor we had intended to use didn't work as
-expected (wasn't precise enough at further distances, only seems to work accurately within 5-10cm), so instead
-we've decided to change the project to use a light sensor instead. Had trouble getting the FSM to work (kept
-getting stuck in state 101, took longer to debug than expected), so we may not be able to add the
-high score feature, have updated that in the project description as (optional).
+
 
