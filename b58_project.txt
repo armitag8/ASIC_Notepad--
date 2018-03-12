@@ -93,6 +93,9 @@ Why is this project interesting/cool (for CSCB58 students, and for non CSCB58 st
 
 Why did you personally choose this project?:
 
+We wanted to create a machine with functions that seem basic and commonplace which we usually take for granted.
+In our case it's a "simple" text editor which we can write to.
+
 Attributions
 ------------
 
