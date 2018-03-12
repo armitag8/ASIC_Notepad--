@@ -89,24 +89,24 @@ pixel within each character. Also a module will need to be created in order tran
 Finally the process of reading, then writing, or overwriting will be controlled by a finite state machine.
 
 Why is this project interesting/cool (for CSCB58 students, and for non CSCB58 students?):
-A text-based editor is known to everyone. To learn to re-create the
-hardware composition of such a trivial program which is mostly taken 
-for granted is an exciting journey; since the process of designing hardware 
-behind it is not so trivial. what's more interesting is that knowledge we have 
-accumulated in all the labs and lectures is directly applicable to this project. 
-The fun part is to realize how to bring together all bits and pieces and create 
-a fully functional error-free text editor.
+
+For Students of this course the interesting part of this project is not its actual functionality
+but the ideas in the process needed to make this project, to be able to translate the keyboard input into a meaningful output.
+and be able to also display it in an easily legible way.
+
+For students who are not in this course this would be interesting as they would come to understand the 
+complexity of a creating a machine which is thought to be as basic as a teleprompter.
 
 Why did you personally choose this project?:
 
-We wanted to create a machine with functions that seem basic and commonplace which we usually take for granted.
-In our case it's a "simple" text editor which we can write to.
-
+A text-based editor is known to and have been used by everyone. We decided to learn to re-create the
+hardware composition of such a trivial program which is mostly taken for granted.
+To do this we would have to use knowledge we have accumulated in all the labs and lectures directly applying it to this project. 
+The exciting part is realizeing how to bring together all bits and pieces, expanding on all areas to meet our specific needs and creating 
+a fully functional error-free text editor.
 Attributions
 ------------
 
 
 Updates
 -------
-
-
