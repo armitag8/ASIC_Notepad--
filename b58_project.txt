@@ -32,7 +32,7 @@ Project Details
 ---------------
 Project Title: Notepad--
 
-Project Description: A notepad style machine which translates keyboard input onto a VGA monitor.
+Project Description: A notepad-style machine which translates keyboard input onto a VGA monitor.
 
 Video URL: 
 
@@ -83,11 +83,10 @@ output  is required for this project.
 Motivations
 -----------
 How does this project relate to the material covered in CSCB58?:
-This project will make use of a storage system to keep the location and value of characters written on the VGA moniter.
-There will be an ALU for the overall machine which will calulate the next position for the character to be written. 
-Also a display module will need to be created in order to translate information to the vga,
-as well as a module to translate input which is given throught the keyboard. Finally this will be controlled by a finite state machine
-for the entire process of displaying new characters onto the monitor.
+This project will make use of a RAM module to keep the location and value of characters written on the VGA monitor.
+An adder will be needed in order to calulate successive positions for each character to be written as well as each 
+pixel within each character. Also a module will need to be created in order translate input from the keyboard. 
+Finally the process of reading, then writing, or overwriting will be controlled by a finite state machine.
 
 Why is this project interesting/cool (for CSCB58 students, and for non CSCB58 students?):
 A text-based editor is known to everyone. To learn to re-create the
