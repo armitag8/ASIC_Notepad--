@@ -84,12 +84,19 @@ Motivations
 -----------
 How does this project relate to the material covered in CSCB58?:
 This project will make use of a storage system to keep the location and value of characters written on the VGA moniter.
-There will be a ALU for the overall machine which will calulate the next position for the character to be written. 
+There will be an ALU for the overall machine which will calulate the next position for the character to be written. 
 Also a display module will need to be created in order to translate information to the vga,
 as well as a module to translate input which is given throught the keyboard. Finally this will be controlled by a finite state machine
 for the entire process of displaying new characters onto the monitor.
 
 Why is this project interesting/cool (for CSCB58 students, and for non CSCB58 students?):
+A text-based editor is known to everyone. To learn to re-create the
+hardware composition of such a trivial program which is mostly taken 
+for granted is an exciting journey; since the process of designing hardware 
+behind it is not so trivial. what's more interesting is that knowledge we have 
+accumulated in all the labs and lectures is directly applicable to this project. 
+The fun part is to realize how to bring together all bits and pieces and create 
+a fully functional error-free text editor.
 
 Why did you personally choose this project?:
 
@@ -102,6 +109,5 @@ Attributions
 
 Updates
 -------
-
 
 
