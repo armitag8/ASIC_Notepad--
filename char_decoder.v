@@ -1,6 +1,6 @@
-module(
-	output reg [127:0] OUT,
-	input [6:0] IN
+module char_decoder(
+		output reg [127:0] OUT,
+		input [6:0] IN
 	);
 	always @(*)
 	begin
