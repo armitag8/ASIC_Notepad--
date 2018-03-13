@@ -12,7 +12,7 @@ module counter_8bit
 			if (CLR == 1'b1)
 				Q_OUT[7:0] <= 8'b0000_0000;
 			else if (CLK == 1'b1)
-			   Q_OUT[7:0] <= Q_OUT[7:0] + 5'b0000_00001;
+			   Q_OUT[7:0] <= Q_OUT[7:0] + 8'b0000_00001;
 		end
 	end
 endmodule
