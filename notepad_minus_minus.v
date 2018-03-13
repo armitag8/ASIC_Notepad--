@@ -119,8 +119,8 @@ module datapath
 		input [6:0] letter_in
 	);
 
-	reg [7:0] x;
-	reg [6:0] y;
+	reg [9:0] x;
+	reg [8:0] y;
 	wire top_shifter_bit;
 	wire [127:0] letter_out;
 	
@@ -134,7 +134,7 @@ module datapath
 	
 	// Instantiate character decoder
 	char_decoder decoder0(
-							.OUT(letter_out)
+							.OUT(letter_out),
 							.IN(letter_in)
 						);
 	
@@ -152,12 +152,12 @@ module datapath
 	localparam MAX = 8'd128;
 	
 	always @(negedge clk)
-	begin: colour_out
+	begin: colour_activator
 		if (top_shifter_bit)
 			colour_out = colour_in;
 		else
 			colour_out = 3'b000;
-	end // colour_out
+	end // colour_activator
 	
 	initial
 	begin
@@ -168,9 +168,9 @@ module datapath
 	always @(negedge clk)
 	begin: coordinate_loader
 		if (ld_x)
-			x = {1'b0, coord_in};
+			x = coord_in;
 		if (ld_y)
-			y = coord_in;	
+			y = coord_in[8:0];	
 	end // coordinate_loader
 
 	always @(posedge clk)
@@ -193,7 +193,7 @@ module control_FSM(
 		input reset_n,
 		input next_val,
 		input go,
-		input [7:0] counter_in,
+		input [7:0] counter_in
 	);
 
 	reg [2:0] current_state, next_state;
