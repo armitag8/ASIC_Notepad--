@@ -1,8 +1,8 @@
 module hex_display(
 	input [3:0] IN,
-	REG [6:0] OUT
+	output reg [6:0] OUT
 	);
-    always @(*)
+   always @(*)
 	begin
 		case(IN[3:0])
 			4'b0000: OUT = 7'b1000000;
