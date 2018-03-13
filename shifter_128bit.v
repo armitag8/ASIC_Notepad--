@@ -1,4 +1,4 @@
-module shiftRegister
+module shifter_128bit
 	(
 		output result,
 		input [127:0] load_val,
