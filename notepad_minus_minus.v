@@ -3,13 +3,12 @@ module notepad_minus_minus
 		input CLOCK_50,							//	On Board 50 MHz
 		input [3:0] KEY,
 		input [17:0]  SW,
-		/*
 		output [6:0] HEX0,
 		output [6:0] HEX1,
 		output [6:0] HEX2,
 		output [6:0] HEX3,
 		output [6:0] HEX4,
-		*/
+		output [6:0] HEX5,
 		// The ports below are for the VGA output.  Do not change.
 		output VGA_CLK,   						//	VGA Clock
 		output VGA_HS,							//	VGA H_SYNC
@@ -27,8 +26,8 @@ module notepad_minus_minus
 	
 	// Create the colour, x, y and writeEn wires that are inputs to the controller.
 	wire [2:0] colour;
-	wire [9:0] x;
-	wire [8:0] y;
+	wire [8:0] x;
+	wire [9:0] y;
 	wire writeEn;
 	wire [7:0] counter_transfer;
 	wire increment_transfer, ld_x_transfer, ld_y_transfer;
@@ -52,7 +51,7 @@ module notepad_minus_minus
 			.VGA_BLANK(VGA_BLANK_N),
 			.VGA_SYNC(VGA_SYNC_N),
 			.VGA_CLK(VGA_CLK));
-	defparam VGA.RESOLUTION = "640x480";
+	defparam VGA.RESOLUTION = "160x120";
 	defparam VGA.MONOCHROME = "FALSE";
 	defparam VGA.BITS_PER_COLOUR_CHANNEL = 1;
 	defparam VGA.BACKGROUND_IMAGE = "black.mif";
@@ -66,7 +65,7 @@ module notepad_minus_minus
 			.clk(CLOCK_50),
 			.reset_n(~resetn),
 			.coord_in(SW[9:0]),
-			.colour_in({3{SW[10]}}),
+			.colour_in(3'b111),
 			.increment_counter(increment_transfer),
 			.reset_counter(reset_c),
 			.ld_x(ld_x_transfer),
@@ -88,7 +87,6 @@ module notepad_minus_minus
 			.counter_in(counter_transfer)
 			);
 		
-		/*
 		hex_display h0(.IN(x[3:0]),
 							.OUT(HEX0));
 		hex_display h1(.IN(x[7:4]),
@@ -97,15 +95,16 @@ module notepad_minus_minus
 							.OUT(HEX2));
 		hex_display h3(.IN({1'b0, y[6:4]}),
 							.OUT(HEX3));
-		hex_display h4(.IN(counter_transfer),
+		hex_display h4(.IN(counter_transfer[3:0]),
 							.OUT(HEX4));
-		*/
+		hex_display h5(.IN(counter_transfer[7:4]),
+							.OUT(HEX5));
 endmodule
 
 module datapath
 	(
-		output reg [9:0] x_out,
-		output reg [8:0] y_out,
+		output reg [8:0] x_out,
+		output reg [9:0] y_out,
 		output reg [2:0] colour_out,
 		output [7:0] counter, 
 		input clk,
@@ -119,8 +118,8 @@ module datapath
 		input [6:0] letter_in
 	);
 
-	reg [9:0] x;
-	reg [8:0] y;
+	reg [8:0] x;
+	reg [9:0] y;
 	wire top_shifter_bit;
 	wire [127:0] letter_out;
 	
@@ -161,16 +160,16 @@ module datapath
 	
 	initial
 	begin
-		x = 10'b00_0000_0000;
-		y = 9'b0_0000_0000;
+		x = 9'b0_0000_0000;
+		y = 10'b00_0000_0000;
 	end
 
 	always @(negedge clk)
 	begin: coordinate_loader
 		if (ld_x)
-			x = coord_in;
+			x = coord_in[8:0];
 		if (ld_y)
-			y = coord_in[8:0];	
+			y = coord_in;	
 	end // coordinate_loader
 
 	always @(posedge clk)
@@ -212,13 +211,13 @@ module control_FSM(
 	begin: state_table
 		case (current_state)
 			S_LOAD_X: 				next_state = next_val ? S_LOAD_X_WAIT : S_LOAD_X;
-			S_LOAD_X_WAIT: 			next_state = ~next_val ? S_LOAD_Y : S_LOAD_X_WAIT;
+			S_LOAD_X_WAIT: 		next_state = ~next_val ? S_LOAD_Y : S_LOAD_X_WAIT;
 			S_LOAD_Y: 				next_state = go ? S_LOAD_Y_WAIT : S_LOAD_Y;
 			S_LOAD_Y_WAIT:		 	next_state = ~go ? S_PLOT_XY : S_LOAD_Y_WAIT;
 			S_PLOT_XY: 				next_state = S_PLOT_WAIT;
 			S_PLOT_WAIT:			next_state = S_INCREMENT_COUNTER;
 			S_INCREMENT_COUNTER:	next_state = S_INCREMENT_WAIT;
-			S_INCREMENT_WAIT: 		next_state = (counter_in <= MAX) ? S_PLOT_XY : S_LOAD_X;
+			S_INCREMENT_WAIT: 	next_state = (counter_in <= MAX) ? S_PLOT_XY : S_LOAD_X;
 			default: 				next_state = S_LOAD_X;
 		endcase
 	end // state_table
@@ -233,12 +232,12 @@ module control_FSM(
 		case (current_state)
 			S_LOAD_X:
 				begin
-									ld_x						= 1'b1;
-									reset_counter				= 1'b1;
+										ld_x						= 1'b1;
+										reset_counter			= 1'b1;
 				end
 			S_LOAD_Y: 				ld_y 						= 1'b1;
 			S_PLOT_XY:				plot 						= 1'b1;
-			S_INCREMENT_COUNTER: 	increment_counter 			= 1'b1;
+			S_INCREMENT_COUNTER: increment_counter 	= 1'b1;
 		endcase
 	end // enable_signals
 	
