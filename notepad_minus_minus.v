@@ -3,11 +3,13 @@ module notepad_minus_minus
 		input CLOCK_50,							//	On Board 50 MHz
 		input [3:0] KEY,
 		input [17:0]  SW,
+		/*
 		output [6:0] HEX0,
 		output [6:0] HEX1,
 		output [6:0] HEX2,
 		output [6:0] HEX3,
 		output [6:0] HEX4,
+		*/
 		// The ports below are for the VGA output.  Do not change.
 		output VGA_CLK,   						//	VGA Clock
 		output VGA_HS,							//	VGA H_SYNC
@@ -30,7 +32,6 @@ module notepad_minus_minus
 	wire writeEn;
 	wire [7:0] counter_transfer;
 	wire increment_transfer, ld_x_transfer, ld_y_transfer;
-	wire [6:0] letter = SW[17:11];
 
 	// Create an Instance of a VGA controller - there can be only one!
 	// Define the number of colours as well as the initial background
@@ -51,16 +52,14 @@ module notepad_minus_minus
 			.VGA_BLANK(VGA_BLANK_N),
 			.VGA_SYNC(VGA_SYNC_N),
 			.VGA_CLK(VGA_CLK));
-		defparam VGA.RESOLUTION = "640x480";
-		defparam VGA.MONOCHROME = "FALSE";
-		defparam VGA.BITS_PER_COLOUR_CHANNEL = 1;
-		defparam VGA.BACKGROUND_IMAGE = "black.mif";
-			
-	// Put your code here. Your code should produce signals x,y,colour and writeEn/plot
-	// for the VGA controller, in addition to any other functionality your design may require.
-    
-   // Instantiate datapath
-	datapath d0(.x_out(x),
+	defparam VGA.RESOLUTION = "640x480";
+	defparam VGA.MONOCHROME = "FALSE";
+	defparam VGA.BITS_PER_COLOUR_CHANNEL = 1;
+	defparam VGA.BACKGROUND_IMAGE = "black.mif";
+
+    // Instantiate datapath
+	datapath d0(
+			.x_out(x),
 			.y_out(y),
 			.colour_out(colour),
 			.counter(counter_transfer),
@@ -71,10 +70,13 @@ module notepad_minus_minus
 			.increment_counter(increment_transfer),
 			.reset_counter(reset_c),
 			.ld_x(ld_x_transfer),
-			.ld_y(ld_y_transfer));
+			.ld_y(ld_y_transfer),
+			.letter_in(SW[17:11])
+			);
 
     // Instantiate FSM control
-    control_FSM c0(.plot(writeEn),
+    control_FSM c0(
+			.plot(writeEn),
 			.increment_counter(increment_transfer),
 			.reset_counter(reset_c),
 			.ld_x(ld_x_transfer),
@@ -83,8 +85,10 @@ module notepad_minus_minus
 			.reset_n(~resetn),
 			.next_val(~KEY[3]),
 			.go(~KEY[1]),
-			.counter_in(counter_transfer));
+			.counter_in(counter_transfer)
+			);
 		
+		/*
 		hex_display h0(.IN(x[3:0]),
 							.OUT(HEX0));
 		hex_display h1(.IN(x[7:4]),
@@ -95,33 +99,70 @@ module notepad_minus_minus
 							.OUT(HEX3));
 		hex_display h4(.IN(counter_transfer),
 							.OUT(HEX4));
+		*/
 endmodule
 
-module datapath(
-	output reg [7:0] x_out,
-	output reg [6:0] y_out,
-	output [2:0] colour_out,
-	output [7:0] counter, 
-	input clk,
-	input reset_n, 
-	input [6:0] coord_in,
-	input [2:0] colour_in,
-	input increment_counter,
-	input reset_counter,
-	input ld_x, 
-	input ld_y);
+module datapath
+	(
+		output reg [9:0] x_out,
+		output reg [8:0] y_out,
+		output reg [2:0] colour_out,
+		output [7:0] counter, 
+		input clk,
+		input reset_n, 
+		input [9:0] coord_in,
+		input [2:0] colour_in,
+		input increment_counter,
+		input reset_counter,
+		input ld_x, 
+		input ld_y,
+		input [6:0] letter_in
+	);
 
 	reg [7:0] x;
 	reg [6:0] y;
+	wire top_shifter_bit;
+	wire [127:0] letter_out;
+	
+	// Instantiate counter
+	counter_8bit c0(
+						.Q_OUT(counter), 
+						.EN(increment_counter), 
+						.CLK(clk), 
+						.CLR(reset_counter)
+					);
+	
+	// Instantiate character decoder
+	char_decoder decoder0(
+							.OUT(letter_out)
+							.IN(letter_in)
+						);
+	
+	
+	// Instantiate shifter
+    shifter_128bit s0(
+						.result(top_shifter_bit),
+						.load_val(letter_out),
+						.load_n(reset_counter),
+						.shift(increment_counter),
+						.reset(reset_n),
+						.clock(clk)
+					);
 
 	localparam MAX = 8'd128;
 	
-	assign colour_out = colour_in;
+	always @(negedge clk)
+	begin: colour_out
+		if (top_shifter_bit)
+			colour_out = colour_in;
+		else
+			colour_out = 3'b000;
+	end // colour_out
 	
 	initial
 	begin
-		x = 8'b0000_0000;
-		y = 7'b0000_000;
+		x = 10'b00_0000_0000;
+		y = 9'b0_0000_0000;
 	end
 
 	always @(negedge clk)
@@ -140,21 +181,20 @@ module datapath(
 			y_out = y + counter[6:3];
 		end
 	end // coordinate_shifter
-	
-	counter_8bit c0(.Q_OUT(counter), .EN(increment_counter), .CLK(clk), .CLR(reset_counter));
 endmodule
 
 module control_FSM(
-	output reg plot, 
-	output reg increment_counter,
-	output reg reset_counter,
-	output reg ld_x,
-	output reg ld_y,
-	input clk,
-	input reset_n,
-	input next_val,
-	input go,
-	input [7:0] counter_in);
+		output reg plot, 
+		output reg increment_counter,
+		output reg reset_counter,
+		output reg ld_x,
+		output reg ld_y,
+		input clk,
+		input reset_n,
+		input next_val,
+		input go,
+		input [7:0] counter_in,
+	);
 
 	reg [2:0] current_state, next_state;
 
@@ -197,7 +237,7 @@ module control_FSM(
 									reset_counter				= 1'b1;
 				end
 			S_LOAD_Y: 				ld_y 						= 1'b1;
-			S_PLOT_XY: 				plot 						= 1'b1;
+			S_PLOT_XY:				plot 						= 1'b1;
 			S_INCREMENT_COUNTER: 	increment_counter 			= 1'b1;
 		endcase
 	end // enable_signals
