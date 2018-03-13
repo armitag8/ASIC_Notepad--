@@ -8,7 +8,7 @@ module shifter_128bit
 		input clock
 	);
     
-    reg pixel[127:0];
+    reg [127:0] pixel;
     
     assign result = pixel[127];
     
@@ -19,7 +19,6 @@ module shifter_128bit
         else if (load_n == 1'b1)
             pixel <= load_val;
         else if (shift == 1'b1)
-            pixel << 1'b1;
+            pixel <= pixel << 1;
     end
-
 endmodule
