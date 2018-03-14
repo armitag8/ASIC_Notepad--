@@ -45,68 +45,100 @@ Proposal
 --------
 
 What do you plan to have completed by the end of the first lab session?:
-The ASIC will have the ability to print simple characters (A-Z, 
-0-9) through the VGA in arbitrary positions using switches on 
-the DE2 as input. Each character will fill the same dimensions, 
-with no kerning, spacing or vertical alignment encoded. The 
-colour or each character may also be selected.
+    The ASIC will have the ability to print simple characters (A-Z, 
+    0-9) through the VGA in arbitrary positions using switches on 
+    the DE2 as input. Each character will fill the same dimensions, 
+    with no kerning, spacing or vertical alignment encoded. The 
+    colour or each character may also be selected.
 
 What do you plan to have completed by the end of the second lab session?:
-The ASIC  will now accept individual characters with no position 
-information and print them through the VGA to the next available 
-position, beginning from the top-left corner, and proceeding in 
-normal latin left-to-right then top-to-bottom order. 
-Additionally, instead of taking input from the DE2 switches, the 
-ASIC will now take input from a keyboard connected via the DE2's 
-PS/2 port.
+    The ASIC  will now accept individual characters with no position 
+    information and print them through the VGA to the next available 
+    position, beginning from the top-left corner, and proceeding in 
+    normal latin left-to-right then top-to-bottom order. 
+    Additionally, instead of taking input from the DE2 switches, the 
+    ASIC will now take input from a keyboard connected via the DE2's 
+    PS/2 port.
 
 What do you plan to have completed by the end of the third lab session?:
-The ASIC will now be capable of overwriting previous characters 
-displayed on the screen, using the Backspace key, as well as 
-posess carriage return / line feed functionality. Time-
-dependant, additional features that could be included are:
-- A flashing cursor to enable overwriting at the selected position (navigation with arrow keys)
-- Rudimentary line-copy and line-paste
-- The ability to write special characters, such braces, brackets, colons, etc.
-- ^The same, with lowercase letters
-- Multiple 'pages', scrolling
+    The ASIC will now be capable of overwriting previous characters 
+    displayed on the screen, using the Backspace key, as well as 
+    posess carriage return / line feed functionality. Time-
+    dependant, additional features that could be included are:
+        - A flashing cursor to enable overwriting at the selected position (navigation 
+            with arrow keys)
+        - Rudimentary line-copy and line-paste
+        - The ability to write special characters, such braces, brackets, colons, etc.
+        - ^The same, with lowercase letters
+        - Multiple 'pages', scrolling
 
 What is your backup plan if things don’t work out as planned?
-As this project has many features that are not necessary for a 
-rudimentary text editor, each can be omitted, if time is overly 
-constrained.
+    As this project has many features that are not necessary for a 
+    rudimentary text editor, each can be omitted, if time is overly 
+    constrained.
 
 What hardware will you need beyond the DE2 board 
-In addition to a display with VGA input,  a keyboard with PS/2 
-output  is required for this project.
+    In addition to a display with VGA input,  a keyboard with PS/2 
+    output  is required for this project.
 
 Motivations
 -----------
 How does this project relate to the material covered in CSCB58?:
-This project will make use of a RAM module to keep the location and value of characters written on the VGA monitor.
-An adder will be needed in order to calulate successive positions for each character to be written as well as each 
-pixel within each character. Also a module will need to be created in order translate input from the keyboard. 
-Finally the process of reading, then writing, or overwriting will be controlled by a finite state machine.
+    This project will make use of a RAM module to keep the location and value of characters
+    written on the VGA monitor. An adder will be needed in order to calulate successive positions
+    for each character to be written as well as each pixel within each character. Also a module will 
+    need to be created in order translate input from the keyboard. Finally the process of reading, 
+    then writing, or overwriting will be controlled by a finite state machine.
 
 Why is this project interesting/cool (for CSCB58 students, and for non CSCB58 students?):
 
-For Students of this course the interesting part of this project is not its actual functionality
-but the ideas in the process needed to make this project, to be able to translate the keyboard input into a meaningful output.
-and be able to also display it in an easily legible way.
+    For Students of this course the interesting part of this project is not its actual functionality
+    but the ideas in the process needed to make this project, to be able to translate the keyboard
+    input into a meaningful output and be able to also display it in an easily legible way.
 
-For students who are not in this course this would be interesting as they would come to understand the 
-complexity of a creating a machine which is thought to be as basic as a teleprompter.
+    For students who are not in this course this would be interesting as they would come to understand the 
+    complexity of a creating a machine which is thought to be as basic as a teleprompter.
 
 Why did you personally choose this project?:
 
-A text-based editor is known to and have been used by everyone. We decided to learn to re-create the
-hardware composition of such a trivial program which is mostly taken for granted.
-To do this we would have to use knowledge we have accumulated in all the labs and lectures directly applying it to this project. 
-The exciting part is realizeing how to bring together all bits and pieces, expanding on all areas to meet our specific needs and creating 
-a fully functional error-free text editor.
+    A text-based editor is known to and have been used by everyone. We decided to learn to re-create the
+    hardware composition of such a trivial program which is mostly taken for granted.
+    To do this we would have to use knowledge we have accumulated in all the labs and lectures
+    directly applying it to this project. The exciting part is realizeing how to bring together all bits
+    and pieces, expanding on all areas to meet our specific needs and creating a fully functional 
+    error-free text editor.
+
 Attributions
 ------------
+
+1. VGA Adapter Module:
+    We directly used the VGA adapter downloaded from:
+    http://www.utsc.utoronto.ca/~bharrington/cscb58/labs/lab6-part2.zip
+    Free usage permisision under Creative Commons License.
+    Copyright 2006 Sam Vafaee, Copyright 2007 Tomasz S. Czajkowski
+    
+
+2. Font:
+    We based our font on the basis33 font downloaded from:
+    http://dl.1001fonts.com/basis33.zip
+    Free usage permission under MIT License:
+    Copyright 2004, 2005 Tristan Gammer, Copyright 2014 Manchson.
 
 
 Updates
 -------
+
+    Week 1
+    ------
+        - We successfully printed [A-Z] and [0-9] to arbitrary positions through the VGA.
+        - We encountered an issue when attempting to output at standard VGA resolution 640x480:
+            The VGA adapter provided for Lab06 has a maximum output resolution of 320x240, 
+            so we may constrain editor to print a maximum of 40 characters width, unless we
+            can find an alternative VGA module.
+        - We had extra time and resources, so we began the keyboard input driver, too. It 
+            currently accepts individual presses only (no shift-A, for example) and
+            works with our display hardware.
+            
+    Week 2
+    ------
+        -
