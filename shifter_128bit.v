@@ -14,8 +14,8 @@ module shifter_128bit
     
     always @(posedge clock)
 	begin 
-        if(reset == 1'b0)
-            pixel <= 128'd0;
+        if(reset == 1'b1)
+            pixel <= {128{1'b0}};
         else if (load_n == 1'b1)
             pixel <= load_val;
         else if (shift == 1'b1)
