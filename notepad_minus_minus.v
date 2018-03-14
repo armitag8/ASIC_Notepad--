@@ -1,14 +1,10 @@
 module notepad_minus_minus
 	(
+		input PS2_KBCLK,
+	   input PS2_KBDAT,
 		input CLOCK_50,							//	On Board 50 MHz
 		input [3:0] KEY,
 		input [17:0]  SW,
-		output [6:0] HEX0,
-		output [6:0] HEX1,
-		output [6:0] HEX2,
-		output [6:0] HEX3,
-		output [6:0] HEX4,
-		output [6:0] HEX5,
 		// The ports below are for the VGA output.  Do not change.
 		output VGA_CLK,   						//	VGA Clock
 		output VGA_HS,							//	VGA H_SYNC
@@ -55,8 +51,17 @@ module notepad_minus_minus
 	defparam VGA.MONOCHROME = "FALSE";
 	defparam VGA.BITS_PER_COLOUR_CHANNEL = 1;
 	defparam VGA.BACKGROUND_IMAGE = "black.mif";
-
-    // Instantiate datapath
+	
+	wire [6:0] ASCII_value;
+	
+	// instantiate keyboard input
+	keyboard_decoder kd(
+		.PS2_KBCLK(PS2_KBCLK),
+		.PS2_KBDAT(PS2_KBDAT),
+      .ASCII_value(ASCII_value)
+	);
+	
+   // Instantiate datapath
 	datapath d0(
 			.x_out(x),
 			.y_out(y),
@@ -70,7 +75,7 @@ module notepad_minus_minus
 			.reset_counter(reset_c),
 			.ld_x(ld_x_transfer),
 			.ld_y(ld_y_transfer),
-			.letter_in(SW[17:11])
+			.letter_in(ASCII_value)
 			);
 
     // Instantiate FSM control
@@ -82,23 +87,10 @@ module notepad_minus_minus
 			.ld_y(ld_y_transfer),
 			.clk(CLOCK_50),
 			.reset_n(~resetn),
-			.next_val(~KEY[3]),
-			.go(~KEY[1]),
+			.next_val(PS2_KBCLK),
+			.go(~PS2_KBCLK),
 			.counter_in(counter_transfer)
 			);
-		
-		hex_display h0(.IN(x[3:0]),
-							.OUT(HEX0));
-		hex_display h1(.IN(x[7:4]),
-							.OUT(HEX1));
-		hex_display h2(.IN(y[3:0]),
-							.OUT(HEX2));
-		hex_display h3(.IN({1'b0, y[6:4]}),
-							.OUT(HEX3));
-		hex_display h4(.IN(counter_transfer[3:0]),
-							.OUT(HEX4));
-		hex_display h5(.IN(counter_transfer[7:4]),
-							.OUT(HEX5));
 endmodule
 
 module datapath

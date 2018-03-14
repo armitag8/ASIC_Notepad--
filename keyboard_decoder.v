@@ -1,18 +1,12 @@
 module keyboard_decoder(
 	input PS2_KBCLK,
 	input PS2_KBDAT,
-        output [6:0] ASCII_value,
-	output [6:0] HEX0,
-	output [6:0] HEX1,
-	output [6:0] HEX4,
-	output [6:0] HEX5,
-	output [7:0] LEDR
+   output [6:0] ASCII_value
 	);
 
 	wire [7:0] data_out;
 	wire [6:0] acsii_code;
 	
-	assign LEDR[7:0] = data_out;
 	assign ASCII_value[6:0] = acsii_code;
 	
 	keyboard_output kb(
@@ -21,29 +15,9 @@ module keyboard_decoder(
 	.data_out(data_out[7:0])
 	);
 
-	hex_display h0(
-	.IN(data_out[3:0]),
-	.OUT(HEX0[6:0])
-	);
-
-	hex_display h1(
-	.IN(data_out[7:4]),
-	.OUT(HEX1[6:0])
-	);
-	
 	translate_to_ASCII tta(
 	.data(data_out[7:0]),
 	.OUT(acsii_code[6:0])
-	);
-	
-	hex_display h2(
-	.IN(acsii_code[3:0]),
-	.OUT(HEX4[6:0])
-	);
-	
-	hex_display h3(
-	.IN(acsii_code[7:4]),
-	.OUT(HEX5[6:0])
 	);
 endmodule
 
@@ -147,33 +121,4 @@ module keyboard_output(
     else
         data_pre<=data_curr;
     end
-endmodule
-
-module hex_display(
-	input [3:0] IN,
-	output reg [6:0] OUT
-	);
-   
-	always @(*)
-	begin
-		case(IN[3:0])
-			4'b0000: OUT = 7'b1000000;
-			4'b0001: OUT = 7'b1111001;
-			4'b0010: OUT = 7'b0100100;
-			4'b0011: OUT = 7'b0110000;
-			4'b0100: OUT = 7'b0011001;
-			4'b0101: OUT = 7'b0010010;
-			4'b0110: OUT = 7'b0000010;
-			4'b0111: OUT = 7'b1111000;
-			4'b1000: OUT = 7'b0000000;
-			4'b1001: OUT = 7'b0011000;
-			4'b1010: OUT = 7'b0001000;
-			4'b1011: OUT = 7'b0000011;
-			4'b1100: OUT = 7'b1000110;
-			4'b1101: OUT = 7'b0100001;
-			4'b1110: OUT = 7'b0000110;
-			4'b1111: OUT = 7'b0001110;
-			default: OUT = 7'b0111111;
-		endcase
-	end
 endmodule
