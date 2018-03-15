@@ -1,34 +1,30 @@
 module keyboard_decoder(
-	input PS2_KBCLK,
-	input PS2_KBDAT,
-   output [6:0] ASCII_value
+        input PS2_KBCLK,
+        input PS2_KBDAT,
+        output [6:0] ASCII_value
 	);
-
-	wire [7:0] data_out;
-	wire [6:0] acsii_code;
-	
-	assign ASCII_value[6:0] = acsii_code;
+	wire [7:0] KB_raw;
 	
 	keyboard_output kb(
-	.clk(PS2_KBCLK),
-	.data(PS2_KBDAT),
-	.data_out(data_out[7:0])
+        .clk(PS2_KBCLK),
+        .data_in(PS2_KBDAT),
+        .data_out(KB_raw[7:0])
 	);
 
 	translate_to_ASCII tta(
-	.data(data_out[7:0]),
-	.OUT(acsii_code[6:0])
+        .IN(KB_raw[7:0]),
+        .OUT(ASCII_value[6:0])
 	);
 endmodule
 
 module translate_to_ASCII(
-	input [7:0] data,
+	input [7:0] IN,
 	output reg [6:0] OUT
 );
 	
 	always @(*)
 	begin
-		case(data[7:0])
+		case(IN[7:0])
 			8'b00101001: OUT = 7'd32; // space
 			8'b01000101: OUT = 7'd48; // '0'
 			8'b00010110: OUT = 7'd49; // '1'
@@ -73,9 +69,9 @@ module translate_to_ASCII(
 endmodule
 
 module keyboard_output(
-    input wire clk, // Clock pin form keyboard
-    input wire data, //Data pin form keyboard
-    output reg [7:0] data_out //Printing input data to data_out
+    input wire clk, // Clock pin from keyboard
+    input wire data_in, // Data pin from keyboard
+    output reg [7:0] data_out // Printing input data to data_out
     );
     reg [7:0] data_curr;
     reg [7:0] data_pre;
@@ -91,21 +87,21 @@ module keyboard_output(
         data_out<=8'hf0;
     end
         
-    always @(negedge clk) //Activating at negative edge of clock from keyboard
+    always @(negedge clk) // Activating at negative edge of clock from keyboard
     begin
     
     case(b)
-        1:; //first bit
-        2:data_curr[0]<=data;
-        3:data_curr[1]<=data;
-        4:data_curr[2]<=data;
-        5:data_curr[3]<=data;
-        6:data_curr[4]<=data;
-        7:data_curr[5]<=data;
-        8:data_curr[6]<=data;
-        9:data_curr[7]<=data;
-        10:flag<=1'b1; //Parity bit
-        11:flag<=1'b0; //Ending bit
+        1:; // first bit
+        2:data_curr[0]<=data_in;
+        3:data_curr[1]<=data_in;
+        4:data_curr[2]<=data_in;
+        5:data_curr[3]<=data_in;
+        6:data_curr[4]<=data_in;
+        7:data_curr[5]<=data_in;
+        8:data_curr[6]<=data_in;
+        9:data_curr[7]<=data_in;
+        10:flag<=1'b1; // Parity bit
+        11:flag<=1'b0; // Ending bit
     endcase
     
     if(b<=10)
@@ -117,7 +113,7 @@ module keyboard_output(
     always@(posedge flag) // Printing data obtained to data_out
     begin
     if(data_curr==8'hf0)
-			data_out<=data_pre;
+		data_out<=data_pre;
     else
         data_pre<=data_curr;
     end
