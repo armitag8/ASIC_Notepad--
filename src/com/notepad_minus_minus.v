@@ -1,7 +1,248 @@
 module notepad_minus_minus
 	(
-		input PS2_KBCLK,
-	   input PS2_KBDAT,
+		input PS2_KBCLK,                        // Keyboard clock
+        input PS2_KBDAT,                        // Keyboard input data
+		input CLOCK_50,							//	On Board 50 MHz
+		input [3:0] KEY,
+		input [17:0]  SW,
+		// The ports below are for the VGA output.  Do not change.
+		output VGA_CLK,   						//	VGA Clock
+		output VGA_HS,							//	VGA H_SYNC
+		output VGA_VS,							//	VGA V_SYNC
+		output VGA_BLANK_N,						//	VGA BLANK
+		output VGA_SYNC_N,						//	VGA SYNC
+		output [9:0] VGA_R,   					//	VGA Red[9:0]
+		output [9:0] VGA_G,	 					//	VGA Green[9:0]
+		output [9:0] VGA_B   					//	VGA Blue[9:0]
+	);
+	
+	wire resetn;
+	wire reset_c;
+	assign resetn = KEY[0];
+	
+	// Create the colour, x, y and writeEn wires that are inputs to the controller.
+	wire [2:0] colour;
+	wire [8:0] x;
+	wire [9:0] y;
+	wire writeEn;
+    // Create wires used to transfer signals and data between datapath and FSM
+	wire [7:0] counter_transfer;
+    wire increment_transfer, ld_x_transfer, ld_y_transfer;
+    // Create wire used to transfer keyboard input to datapath
+    wire [6:0] ASCII_value;
+    
+
+	// Create an Instance of a VGA controller - there can be only one!
+	// Define the number of colours as well as the initial background
+	// image file (.MIF) for the controller.
+	vga_adapter VGA(
+			.resetn(resetn),
+			.clock(CLOCK_50),
+			.colour(colour),
+			.x(x),
+			.y(y),
+			.plot(writeEn),
+			/* Signals for the DAC to drive the monitor. */
+			.VGA_R(VGA_R),
+			.VGA_G(VGA_G),
+			.VGA_B(VGA_B),
+			.VGA_HS(VGA_HS),
+			.VGA_VS(VGA_VS),
+			.VGA_BLANK(VGA_BLANK_N),
+			.VGA_SYNC(VGA_SYNC_N),
+			.VGA_CLK(VGA_CLK));
+	defparam VGA.RESOLUTION = "320x240"; // "160x120" works, for sure
+	defparam VGA.MONOCHROME = "FALSE";
+	defparam VGA.BITS_PER_COLOUR_CHANNEL = 1;
+	defparam VGA.BACKGROUND_IMAGE = "black_320.mif";
+	
+	// Instantiate keyboard input
+	keyboard_decoder kd(
+		.PS2_KBCLK(PS2_KBCLK),
+		.PS2_KBDAT(PS2_KBDAT),
+        .ASCII_value(ASCII_value)
+	);
+	
+   // Instantiate datapath
+	datapath d0(
+			.x_out(x),
+			.y_out(y),
+			.colour_out(colour),
+			.counter(counter_transfer),
+			.clk(CLOCK_50),
+			.reset_n(~resetn),
+			.coord_in(SW[9:0]),
+			.colour_in(3'b111),
+			.increment_counter(increment_transfer),
+			.reset_counter(reset_c),
+			.ld_x(ld_x_transfer),
+			.ld_y(ld_y_transfer),
+			.letter_in(ASCII_value)
+			);
+
+    // Instantiate FSM control
+    control_FSM c0(
+			.plot(writeEn),
+			.increment_counter(increment_transfer),
+			.reset_counter(reset_c),
+			.ld_x(ld_x_transfer),
+			.ld_y(ld_y_transfer),
+			.clk(CLOCK_50),
+			.reset_n(~resetn),
+			.next_val(PS2_KBCLK),
+			.go(~PS2_KBCLK),
+			.counter_in(counter_transfer)
+			);
+endmodule
+
+module datapath
+	(
+		output reg [8:0] x_out,
+		output reg [9:0] y_out,
+		output reg [2:0] colour_out,
+		output [7:0] counter, 
+		input clk,
+		input reset_n, 
+		input [9:0] coord_in,
+		input [2:0] colour_in,
+		input increment_counter,
+		input reset_counter,
+		input ld_x, 
+		input ld_y,
+		input [6:0] letter_in
+	);
+
+	reg [8:0] x;
+	reg [9:0] y;
+	wire top_shifter_bit;
+	wire [127:0] letter_out;
+	
+	// Instantiate counter
+	counter_8bit c0(
+						.Q_OUT(counter), 
+						.EN(increment_counter), 
+						.CLK(clk), 
+						.CLR(reset_counter)
+					);
+	
+	// Instantiate character decoder
+	char_decoder decoder0(
+							.OUT(letter_out),
+							.IN(letter_in)
+						);
+	
+	
+	// Instantiate shifter
+    shifter_128bit s0(
+						.result(top_shifter_bit),
+						.load_val(letter_out),
+						.load_n(reset_counter),
+						.shift(increment_counter),
+						.reset(reset_n),
+						.clock(clk)
+					);
+
+	localparam MAX = 8'd128;
+	
+	always @(negedge clk)
+	begin: colour_activator
+		if (top_shifter_bit)
+			colour_out = colour_in;
+		else
+			colour_out = 3'b000;
+	end // colour_activator
+	
+	initial
+	begin
+		x = 9'b0_0000_0000;
+		y = 10'b00_0000_0000;
+	end
+
+	always @(negedge clk)
+	begin: coordinate_loader
+		if (ld_x)
+			x = coord_in[8:0];
+		if (ld_y)
+			y = coord_in;	
+	end // coordinate_loader
+
+	always @(posedge clk)
+	begin: coordinate_shifter
+		if (~increment_counter)
+		begin
+			x_out = x + counter[2:0];
+			y_out = y + counter[6:3];
+		end
+	end // coordinate_shifter
+endmodule
+
+module control_FSM(
+		output reg plot, 
+		output reg increment_counter,
+		output reg reset_counter,
+		output reg ld_x,
+		output reg ld_y,
+		input clk,
+		input reset_n,
+		input next_val,
+		input go,
+		input [7:0] counter_in
+	);
+
+	reg [2:0] current_state, next_state;
+
+	localparam MAX = 8'd128;
+	localparam 	S_LOAD_X				= 3'd0,
+				S_LOAD_X_WAIT			= 3'd1,
+				S_LOAD_Y				= 3'd2,
+				S_LOAD_Y_WAIT			= 3'd3,
+				S_PLOT_XY				= 3'd4,
+				S_PLOT_WAIT				= 3'd7,
+				S_INCREMENT_COUNTER		= 3'd5,
+				S_INCREMENT_WAIT		= 3'd6;
+
+	always @(*)
+	begin: state_table
+		case (current_state)
+			S_LOAD_X: 				next_state = next_val ? S_LOAD_X_WAIT : S_LOAD_X;
+			S_LOAD_X_WAIT: 		next_state = ~next_val ? S_LOAD_Y : S_LOAD_X_WAIT;
+			S_LOAD_Y: 				next_state = go ? S_LOAD_Y_WAIT : S_LOAD_Y;
+			S_LOAD_Y_WAIT:		 	next_state = ~go ? S_PLOT_XY : S_LOAD_Y_WAIT;
+			S_PLOT_XY: 				next_state = S_PLOT_WAIT;
+			S_PLOT_WAIT:			next_state = S_INCREMENT_COUNTER;
+			S_INCREMENT_COUNTER:	next_state = S_INCREMENT_WAIT;
+			S_INCREMENT_WAIT: 	next_state = (counter_in <= MAX) ? S_PLOT_XY : S_LOAD_X;
+			default: 				next_state = S_LOAD_X;
+		endcase
+	end // state_table
+	
+	always @(negedge clk)
+	begin: enable_signals
+		ld_x = 1'b0;
+		ld_y = 1'b0;
+		increment_counter = 1'b0;
+		plot = 1'b0;
+		reset_counter = 1'b0;
+		case (current_state)
+			S_LOAD_X:
+				begin
+										ld_x						= 1'b1;
+										reset_counter			= 1'b1;
+				end
+			S_LOAD_Y: 				ld_y 						= 1'b1;
+			S_PLOT_XY:				plot 						= 1'b1;
+			S_INCREMENT_COUNTER: increment_counter 	= 1'b1;
+		endcase
+	end // enable_signals
+	
+	always @(posedge clk)
+	begin: state_FFs
+		current_state = reset_n ? S_LOAD_X : next_state;
+	end // state_FFs
+endmodulemodule notepad_minus_minus
+	(
+		input PS2_KBCLK,                        // Keyboard clock
+        input PS2_KBDAT,                        // Keyboard input data
 		input CLOCK_50,							//	On Board 50 MHz
 		input [3:0] KEY,
 		input [17:0]  SW,
