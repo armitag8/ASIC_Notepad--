@@ -5,6 +5,11 @@ module counter_8bit
 		input CLK, 
 		input CLR
 	);
+    initial
+    begin
+        Q_OUT = 8'b0000_0000;
+    end
+
 	always @(posedge CLK)
 	begin
 		if (EN == 1'b1 | CLR == 1'b1)
@@ -12,7 +17,7 @@ module counter_8bit
 			if (CLR == 1'b1)
 				Q_OUT[7:0] <= 8'b0000_0000;
 			else if (CLK == 1'b1)
-			   Q_OUT[7:0] <= Q_OUT[7:0] + 8'b0000_00001;
+			   Q_OUT[7:0] <= Q_OUT[7:0] + 8'b0000_0001;
 		end
 	end
 endmodule
