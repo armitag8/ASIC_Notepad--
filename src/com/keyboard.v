@@ -1,7 +1,7 @@
 module keyboard
 
     (
-	input wire clk, reset,
+		input wire clk, reset,
         input wire ps2d, ps2c,               // ps2 data and clock lines
         output wire [7:0] scan_code,         // scan_code received from keyboard to process
         output wire scan_code_ready,         // signal to outer control system to sample scan_code
