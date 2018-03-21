@@ -82,7 +82,8 @@ module notepad_minus_minus
         );
     
    // Instantiate datapath
-    datapath d0(
+    datapath d0
+        (
             .x_out(x),
             .y_out(y),
             .colour_out(colour),
@@ -99,10 +100,11 @@ module notepad_minus_minus
             .inc_y_pos_counter(inc_y_pos_counter_transfer),
             .reset_y_pos_counter(reset_y_pos_counter_transfer),
             .letter_in(ASCII_value)
-            );
+        );
 
     // Instantiate FSM control
-    control_FSM c0(
+    control_FSM c0
+        (
             .plot(writeEn),
             .inc_pixel_counter(inc_pixel_counter_transfer),
             .reset_pixel_counter(reset_pixel_counter_transfer),
@@ -117,7 +119,7 @@ module notepad_minus_minus
             .x_pos_counter_in(x_pos_counter_transfer),
             .y_pos_counter_in(y_pos_counter_transfer),
             .ascii_code(ASCII_value)
-            );
+        );
 endmodule
 
 module datapath
@@ -143,45 +145,50 @@ module datapath
     wire [127:0] letter_out;
     
     // Instantiate relative pixel position pixel_counter
-    counter_8bit pxcnt0(
-                            .Q_OUT(pixel_counter), 
-                            .EN(inc_pixel_counter), 
-                            .CLK(clk), 
-                            .CLR(reset_pixel_counter)
-                        );
+    counter_8bit pxcnt0
+        (
+            .Q_OUT(pixel_counter), 
+            .EN(inc_pixel_counter), 
+            .CLK(clk), 
+            .CLR(reset_pixel_counter)
+        );
     
     // Instantiate x-position counter
-    counter_6bit xposc0(
-                            .Q_OUT(x_pos_counter),
-                            .EN(inc_x_pos_counter),
-                            .CLK(clk),
-                            .CLR(reset_x_pos_counter)
-                        );
+    counter_6bit xposc0
+        (
+            .Q_OUT(x_pos_counter),
+            .EN(inc_x_pos_counter),
+            .CLK(clk),
+            .CLR(reset_x_pos_counter)
+        );
     
     // Instantiate y-position counter
-    counter_4bit yposc0(
-                            .Q_OUT(y_pos_counter),
-                            .EN(inc_y_pos_counter),
-                            .CLK(clk),
-                            .CLR(reset_y_pos_counter)
-                        );
+    counter_4bit yposc0
+        (
+            .Q_OUT(y_pos_counter),
+            .EN(inc_y_pos_counter),
+            .CLK(clk),
+            .CLR(reset_y_pos_counter)
+        );
     
     // Instantiate character decoder
-    char_decoder decoder0(
-                            .OUT(letter_out),
-                            .IN(letter_in)
-                        );
+    char_decoder decoder0
+        (
+            .OUT(letter_out),
+            .IN(letter_in)
+        );
     
     
     // Instantiate shifter
-   shifter_128bit s0(
-                        .result(top_shifter_bit),
-                        .load_val(letter_out),
-                        .load_n(reset_pixel_counter),
-                        .shift(inc_pixel_counter),
-                        .reset(reset_n),
-                        .clock(clk)
-                    );
+   shifter_128bit s0
+        (
+            .result(top_shifter_bit),
+            .load_val(letter_out),
+            .load_n(reset_pixel_counter),
+            .shift(inc_pixel_counter),
+            .reset(reset_n),
+            .clock(clk)
+        );
      
     always @(negedge clk)
     begin: colour_activator
@@ -221,9 +228,10 @@ module control_FSM(
 
     reg [3:0] current_state, next_state;
 
-    localparam CHAR_SIZE = 8'd127;
-    localparam MAX_X_POS = 6'd39;
-    localparam MAY_Y_POS = 4'd14;
+    localparam  CHAR_SIZE                = 8'd127,
+                MAX_X_POS                = 6'd39,
+                MAY_Y_POS                = 4'd14;
+                
     localparam  S_GET_CHAR              = 4'd0,
                 S_CHECK_CHAR            = 4'd1,
                 S_PLOT_PIXEL            = 4'd2,
@@ -276,7 +284,7 @@ module control_FSM(
                                             inc_y_pos_counter       = 1'b1;
                                             reset_x_pos_counter     = 1'b1;
                             end
-            S_SCROLL:                       reset_y_pos_counter    = 1'b1;
+            S_SCROLL:                       reset_y_pos_counter     = 1'b1;
         endcase
     end // enable_signals
     
