@@ -1,13 +1,13 @@
 module kb_tester
     (
-        output HEX0,
-        output HEX1,
+        output [6:0] HEX0,
+        output [6:0] HEX1,
         output [0:0] LEDR,
         output [0:0] LEDG,
         input CLOCK_50,
         input PS2_CLK,
         input PS2_KBDAT,
-        input [0:0] KEY,
+        input [0:0] KEY
     );
     
     wire [7:0] kb_scan_code, ascii_code;
@@ -36,13 +36,13 @@ module kb_tester
     
     hex_display h0
         (
-            IN(ascii_code[3:0]),
-            OUT(HEX0)
+            .IN(ascii_code[3:0]),
+            .OUT(HEX0)
         );
     
-    hex_display h0
+    hex_display h1
         (
-            IN(ascii_code[7:4]),
-            OUT(HEX0)
+            .IN(ascii_code[7:4]),
+            .OUT(HEX1)
         );
 endmodule
