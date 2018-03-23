@@ -131,9 +131,14 @@ Quick Reference:
         - vga_*
         - keyboard.v
         - pages_RAM.*
+        - keyboardRawData.v
+        - hex_display.v
+        - black.mif
+
     The following modules contain some work from referenced sources:
         - key2ascii.v
         - black_320.mif
+        - black_640.mif
         
 0. Top-level Module:
     Design pattern and much inspiration drawn from Steve Engels' Labs 00-06 (esp. Lab06)
