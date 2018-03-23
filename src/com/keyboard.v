@@ -56,8 +56,8 @@ module keyboard
        
         // defaults
         got_code_tick   = 1'b0;
-	letter_case     = 1'b0;
-	caps_num_next   = caps_num_reg;
+        letter_case     = 1'b0;
+        caps_num_next   = caps_num_reg;
         shift_type_next = shift_type_reg;
         state_next      = state_reg;
        
