@@ -227,9 +227,9 @@ module control_FSM(
 
     reg [3:0] current_state, next_state;
 
-    localparam  CHAR_SIZE                = 8'd127,
-                MAX_X_POS                = 6'd39,
-                MAY_Y_POS                = 4'd14;
+    localparam  CHAR_SIZE               = 8'd127,
+                MAX_X_POS               = 6'd39,
+                MAY_Y_POS               = 4'd14;
                 
     localparam  S_GET_CHAR              = 4'd0,
                 S_CHECK_CHAR            = 4'd1,
@@ -246,17 +246,17 @@ module control_FSM(
     always @(*)
     begin: state_table
         case (current_state)
-            S_GET_CHAR:                  next_state = char_ready ? S_PLOT_PIXEL : S_GET_CHAR;
-            S_PLOT_PIXEL:                next_state = S_PLOT_WAIT;
-            S_PLOT_WAIT:                 next_state = S_INC_PIXEL;
-            S_INC_PIXEL:                 next_state = S_INC_PIXEL_WAIT;
-            S_INC_PIXEL_WAIT:            next_state = (pixel_counter_in <= CHAR_SIZE) ? S_PLOT_PIXEL : S_INC_X_POS;
-            S_INC_X_POS:                 next_state = S_INC_X_POS_WAIT;
-            S_INC_X_POS_WAIT:            next_state = (x_pos_counter_in <= MAX_X_POS) && (ascii_code != 8'h0A) ? S_GET_CHAR : S_INC_Y_POS;
-            S_INC_Y_POS:                 next_state = S_INC_Y_POS_WAIT;
-            S_INC_Y_POS_WAIT:            next_state = (y_pos_counter_in <= MAY_Y_POS) ? S_GET_CHAR : S_SCROLL;
-            S_SCROLL:                    next_state = S_GET_CHAR;
-            default:                     next_state = S_GET_CHAR;
+            S_GET_CHAR:             next_state = char_ready ? S_PLOT_PIXEL : S_GET_CHAR;
+            S_PLOT_PIXEL:           next_state = S_PLOT_WAIT;
+            S_PLOT_WAIT:            next_state = S_INC_PIXEL;
+            S_INC_PIXEL:            next_state = S_INC_PIXEL_WAIT;
+            S_INC_PIXEL_WAIT:       next_state = (pixel_counter_in <= CHAR_SIZE) ? S_PLOT_PIXEL : S_INC_X_POS;
+            S_INC_X_POS:            next_state = S_INC_X_POS_WAIT;
+            S_INC_X_POS_WAIT:       next_state = (x_pos_counter_in <= MAX_X_POS) && (ascii_code != 8'h0A) ? S_GET_CHAR : S_INC_Y_POS;
+            S_INC_Y_POS:            next_state = S_INC_Y_POS_WAIT;
+            S_INC_Y_POS_WAIT:       next_state = (y_pos_counter_in <= MAY_Y_POS) ? S_GET_CHAR : S_SCROLL;
+            S_SCROLL:               next_state = S_GET_CHAR;
+            default:                next_state = S_GET_CHAR;
         endcase
     end // state_table
     
@@ -273,17 +273,17 @@ module control_FSM(
         case (current_state)
             S_GET_CHAR:
                             begin
-                                            load_char               = 1'b1;
-                                            reset_pixel_counter     = 1'b1;
+                                load_char               = 1'b1;
+                                reset_pixel_counter     = 1'b1;
                             end
-            S_PLOT_PIXEL:                   plot                    = 1'b1;
-            S_INC_PIXEL:                    inc_pixel_counter       = 1'b1;
-            S_INC_X_POS:                    inc_x_pos_counter       = 1'b1;
+            S_PLOT_PIXEL:       plot                    = 1'b1;
+            S_INC_PIXEL:        inc_pixel_counter       = 1'b1;
+            S_INC_X_POS:        inc_x_pos_counter       = 1'b1;
             S_INC_Y_POS:    begin
-                                            inc_y_pos_counter       = 1'b1;
-                                            reset_x_pos_counter     = 1'b1;
+                                inc_y_pos_counter       = 1'b1;
+                                reset_x_pos_counter     = 1'b1;
                             end
-            S_SCROLL:                       reset_y_pos_counter     = 1'b1;
+            S_SCROLL:           reset_y_pos_counter     = 1'b1;
         endcase
     end // enable_signals
     
