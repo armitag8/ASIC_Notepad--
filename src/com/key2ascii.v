@@ -132,7 +132,7 @@ always @*
 			8'h49: ascii_code = 8'h2E;   // .
 			8'h4a: ascii_code = 8'h2F;   // /
 			8'h29: ascii_code = 8'h20;   // space
-			8'h5a: ascii_code = 8'h0A;   // enter
+			8'h5a: ascii_code = 8'h0A;   // LF: Return (\n)
 			8'h66: ascii_code = 8'h08;   // backspace
 			8'h0D: ascii_code = 8'h09;   // horizontal tab
             /* Again, we added all these to control cursor movement, behavior */
