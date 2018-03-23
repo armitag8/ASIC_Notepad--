@@ -8,7 +8,7 @@ module key2ascii
 always @*
 	begin
 	if(letter_case == 1'b1)  // uppercase 
-		begin
+		begin // this block is almost identical to keyboard_decoder.v/translate_to_ascii
 		case(scan_code)
 			8'h45: ascii_code = 8'h29;   // )
 			8'h16: ascii_code = 8'h21;   // !
@@ -20,6 +20,7 @@ always @*
 			8'h3d: ascii_code = 8'h26;   // &
 			8'h3e: ascii_code = 8'h2A;   // *
 			8'h46: ascii_code = 8'h28;   // (
+            /* We did all these before we found this module (see keyboard_decoder.v) */
 			8'h1c: ascii_code = 8'h41;   // A
 			8'h32: ascii_code = 8'h42;   // B
 			8'h21: ascii_code = 8'h43;   // C
@@ -46,6 +47,7 @@ always @*
 			8'h22: ascii_code = 8'h58;   // X
 			8'h35: ascii_code = 8'h59;   // Y
 			8'h1a: ascii_code = 8'h5A;   // Z
+            /* But we didn't do special characters */
 			8'h0e: ascii_code = 8'h7E;   // ~
 			8'h4e: ascii_code = 8'h5F;   // _
 			8'h55: ascii_code = 8'h2B;   // +
@@ -58,16 +60,28 @@ always @*
 			8'h49: ascii_code = 8'h3E;   // >
 			8'h4a: ascii_code = 8'h3F;   // ?
 			8'h29: ascii_code = 8'h20;   // space
-			8'h5a: ascii_code = 8'h0D;   // enter
+			8'h5a: ascii_code = 8'h0A;   // LF: Return (\n)
 			8'h66: ascii_code = 8'h08;   // backspace
-			8'h0D: ascii_code = 8'h09;   // horizontal tab	
-			
+			8'h0D: ascii_code = 8'h09;   // horizontal tab
+            /* We added all these to control cursor movement, behavior */
+            8'h75: ascii_code = 8'h11;   // DC1: Up Arrow
+			8'h6B: ascii_code = 8'h12;   // DC2: Left Arrow
+			8'h72: ascii_code = 8'h13;   // DC3: Down Arrow
+			8'h74: ascii_code = 8'h14;   // DC4: Right Arrow
+			8'h6C: ascii_code = 8'h0D;   // CR: Home (\r)
+			8'h7D: ascii_code = 8'h02;   // STX: Page Up
+			8'h7A: ascii_code = 8'h03;   // ETX: Page Down
+			8'h69: ascii_code = 8'h17;   // ETB: End
+			8'h71: ascii_code = 8'h7F;   // DEL: Delete
+			8'h70: ascii_code = 8'h1A;   // SUB: Insert
+            
 			default: ascii_code = 8'h2A; // *
 		endcase
 		end
 	else   // lowercase
 		begin
 		case(scan_code)
+            /* We had also done these */
 			8'h45: ascii_code = 8'h30;   // 0
 			8'h16: ascii_code = 8'h31;   // 1
 			8'h1e: ascii_code = 8'h32;   // 2
@@ -78,6 +92,8 @@ always @*
 			8'h3d: ascii_code = 8'h37;   // 7
 			8'h3e: ascii_code = 8'h38;   // 8
 			8'h46: ascii_code = 8'h39;   // 9
+            /* These scan codes are identical to the uppercase ones, obviously. 
+            Redoing this would have been pointless, so we took it as-is.*/
 			8'h1c: ascii_code = 8'h61;   // a
 			8'h32: ascii_code = 8'h62;   // b
 			8'h21: ascii_code = 8'h63;   // c
@@ -116,9 +132,20 @@ always @*
 			8'h49: ascii_code = 8'h2E;   // .
 			8'h4a: ascii_code = 8'h2F;   // /
 			8'h29: ascii_code = 8'h20;   // space
-			8'h5a: ascii_code = 8'h0D;   // enter
+			8'h5a: ascii_code = 8'h0A;   // enter
 			8'h66: ascii_code = 8'h08;   // backspace
-			8'h0D: ascii_code = 8'h09;   // horizontal tab	
+			8'h0D: ascii_code = 8'h09;   // horizontal tab
+            /* Again, we added all these to control cursor movement, behavior */
+            8'h75: ascii_code = 8'h11;   // DC1: Up Arrow
+			8'h6B: ascii_code = 8'h12;   // DC2: Left Arrow
+			8'h72: ascii_code = 8'h13;   // DC3: Down Arrow
+			8'h74: ascii_code = 8'h14;   // DC4: Right Arrow
+			8'h6C: ascii_code = 8'h0D;   // CR: Home (\r)
+			8'h7D: ascii_code = 8'h02;   // STX: Page Up
+			8'h7A: ascii_code = 8'h03;   // ETX: Page Down
+			8'h69: ascii_code = 8'h17;   // ETB: End
+			8'h71: ascii_code = 8'h7F;   // DEL: Delete
+			8'h70: ascii_code = 8'h1A;   // SUB: Insert
 			
 			default: ascii_code = 8'h2A; // *
 		endcase
