@@ -1,25 +1,24 @@
 module notepad_minus_minus
     (
-        input PS2_KBCLK,                        // Keyboard clock
-        input PS2_KBDAT,                        // Keyboard input data
-        input CLOCK_50,                            //    On Board 50 MHz
-        input [3:0] KEY,
-        input [17:0]  SW,
+        input PS2_KBCLK,                            // Keyboard clock
+        input PS2_KBDAT,                            // Keyboard input data
+        input CLOCK_50,                             //    On Board 50 MHz
+        input [0:0] KEY,                            // Reset key
         // The ports below are for the VGA output.  Do not change.
-        output VGA_CLK,                           //    VGA Clock
-        output VGA_HS,                            //    VGA H_SYNC
-        output VGA_VS,                            //    VGA V_SYNC
-        output VGA_BLANK_N,                        //    VGA BLANK
-        output VGA_SYNC_N,                        //    VGA SYNC
-        output [9:0] VGA_R,                       //    VGA Red[9:0]
+        output VGA_CLK,                             //    VGA Clock
+        output VGA_HS,                              //    VGA H_SYNC
+        output VGA_VS,                              //    VGA V_SYNC
+        output VGA_BLANK_N,                         //    VGA BLANK
+        output VGA_SYNC_N,                          //    VGA SYNC
+        output [9:0] VGA_R,                         //    VGA Red[9:0]
         output [9:0] VGA_G,                         //    VGA Green[9:0]
-        output [9:0] VGA_B                       //    VGA Blue[9:0]
+        output [9:0] VGA_B                          //    VGA Blue[9:0]
     );
     
     wire resetn;
     assign resetn = KEY[0];
     
-    // Create the colour, x, y and writeEn wires that are inputs to the controller.
+    // Create the colour, x, y and writeEn wires that are inputs to the VGA adapter.
     wire [2:0] colour;
     wire [8:0] x;
     wire [7:0] y;
@@ -30,7 +29,7 @@ module notepad_minus_minus
     wire [3:0] y_pos_counter_transfer;
     wire inc_pixel_counter_transfer, inc_x_pos_counter_transfer, inc_y_pos_counter_transfer;
     wire reset_pixel_counter_transfer, reset_x_pos_counter_transfer, reset_y_pos_counter_transfer;
-    // Create wires used to transfer keyboard input to datapath
+    // Create wires used to transfer keyboard input to datapath and FSM
     wire [6:0] ASCII_value;
     wire [7:0] kb_scan_code;
     wire kb_sc_ready, kb_letter_case;
@@ -253,7 +252,7 @@ module control_FSM(
             S_INC_PIXEL:                 next_state = S_INC_PIXEL_WAIT;
             S_INC_PIXEL_WAIT:            next_state = (pixel_counter_in <= CHAR_SIZE) ? S_PLOT_PIXEL : S_INC_X_POS;
             S_INC_X_POS:                 next_state = S_INC_X_POS_WAIT;
-            S_INC_X_POS_WAIT:            next_state = (x_pos_counter_in <= MAX_X_POS) && (ascii_code != 8'h0D) ? S_GET_CHAR : S_INC_Y_POS;
+            S_INC_X_POS_WAIT:            next_state = (x_pos_counter_in <= MAX_X_POS) && (ascii_code != 8'h0A) ? S_GET_CHAR : S_INC_Y_POS;
             S_INC_Y_POS:                 next_state = S_INC_Y_POS_WAIT;
             S_INC_Y_POS_WAIT:            next_state = (y_pos_counter_in <= MAY_Y_POS) ? S_GET_CHAR : S_SCROLL;
             S_SCROLL:                    next_state = S_GET_CHAR;
