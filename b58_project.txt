@@ -139,36 +139,43 @@ Quick Reference:
         - key2ascii.v
         - black_320.mif
         - black_640.mif
-        
-0. Top-level Module:
-    Design pattern and much inspiration drawn from Steve Engels' Labs 00-06 (esp. Lab06)
+
+0. Pin Assignments:
+    We made use of the DE2.qsf file to assign all pins on the DE/2 board to useful names.
+    http://www.utsc.utoronto.ca/~bharrington/cscb58/labs/de2.qsf
+    Usage permisision: educational purposes clause of Intel Programmable Solutions Group EULA.
+    Copyright 2018 Altera University Program
+
+1. Top-level Module:
+    Our design pattern and much inspiration was drawn from Steve Engels' Labs 00-06 (esp. Lab06)
     http://www.utsc.utoronto.ca/~bharrington/cscb58/labs.shtml
     Usage permission as CSCB58 students
     Copyright 2018 University of Toronto
 
-1. VGA Adapter Module:
+2. VGA Adapter Module:
     We directly used the VGA adapter downloaded from:
     http://www.utsc.utoronto.ca/~bharrington/cscb58/labs/lab6-part2.zip
     Free usage permisision under Creative Commons License
     Copyright 2006 Sam Vafaee, Copyright 2007 Tomasz S. Czajkowski
     
 
-2. Font:
+3. Font:
     We based our font on the basis33 font downloaded from:
     http://dl.1001fonts.com/basis33.zip
     Free usage permission under MIT License
     Copyright 2004, 2005 Tristan Gammer, Copyright 2014 Manchson
     
-3. Keyboard module (first):
+4. Keyboard module (first):
     We read, referenced, tested and eventualy rejected the keyboard module from:
     http://students.iitk.ac.in/eclub/assets/tutorials/keyboard.pdf
     We were unable to find usage permissions for this work. We will not use it.
 
-4. Keyboard Module (second):
+5. Keyboard Module (second):
     We directly integrated the entirety of the keyboard.v, key2ascii and ps2_rx.v modules from:
     https://github.com/jconenna/FPGA-Projects/tree/master/Keyboard_Interface
     We obtained usage permission directly from the author, Joey Conenna, vi email,
     dated March 14, 2018 between joe@armitage.com and embeddedthoughtsblog@gmail.com
+
 
 
 Updates
