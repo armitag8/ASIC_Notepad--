@@ -1,5 +1,4 @@
 module counter_8bit
-module counter_8bit
     (
         output reg [7:0] Q_OUT, 
         input EN, 
