@@ -1,4 +1,4 @@
-module keyboard(
+module keyboard_output(
     input wire clk, // Clock pin form keyboard
     input wire data, //Data pin form keyboard
     output reg [7:0] led //Printing input data to led
