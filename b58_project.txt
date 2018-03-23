@@ -1,5 +1,6 @@
 CSCB58 Project File: Winter 2018
 
+
 Team Member A
 -------------
 First Name: Joe
@@ -28,16 +29,22 @@ Last Name: Gupta
 Student Number: 1002353589
 UofT E-mail Address: ra.gupta@mail.utoronto.ca
 
+
 Project Details
 ---------------
-Project Title: Notepad--
+Project Title: 
+    Notepad-- 
 
-Project Description: A notepad-style machine which translates keyboard input onto a VGA monitor.
+Project Description: 
+    An Application-Specific Integrated Circuit implementation of a rudimentary text-editor,
+    without persistence, for use with a PS/2 keyboard and VGA monitor.
 
 Video URL: 
 
-Code URL (please upload a copy of this file to your repository at the end of the project as well, it will
-serve as a useful resource for future development): https://github.com/armitag8/ASIC_Notepad--
+Code URL (please upload a copy of this file to your repository at the end of the project as well, 
+it will serve as a useful resource for future development): 
+    https://github.com/armitag8/ASIC_Notepad--
+    Note: all code in production in src/com; deprecated, reference & test code in src/ext
  
 
 
@@ -45,28 +52,24 @@ Proposal
 --------
 
 What do you plan to have completed by the end of the first lab session?:
-    The ASIC will have the ability to print simple characters (A-Z, 
-    0-9) through the VGA in arbitrary positions using switches on 
-    the DE2 as input. Each character will fill the same dimensions, 
-    with no kerning, spacing or vertical alignment encoded. The 
-    colour or each character may also be selected.
+    The ASIC will have the ability to print simple characters (A-Z, 0-9) through the VGA in 
+    arbitrary positions using switches on the DE2 as input. Each character will fill the same 
+    dimensions, with kerning, spacing and vertical alignment encoded. The position and colour 
+    of each character is selected with the DE/2's switches.
 
 What do you plan to have completed by the end of the second lab session?:
-    The ASIC  will now accept individual characters with no position 
-    information and print them through the VGA to the next available 
-    position, beginning from the top-left corner, and proceeding in 
-    normal latin left-to-right then top-to-bottom order. 
-    Additionally, instead of taking input from the DE2 switches, the 
-    ASIC will now take input from a keyboard connected via the DE2's 
-    PS/2 port.
+    The ASIC  will now accept individual characters with no position information and print them
+    through the VGA to the next available position, beginning from the top-left corner, and 
+    proceeding in normal Latin left-to-right then top-to-bottom order. Additionally, instead of
+    taking input from the DE2 switches, the ASIC will now take input from a keyboard connected 
+    via the DE2's PS/2 port and the colour will be set to a default value (green for retro look).
 
 What do you plan to have completed by the end of the third lab session?:
-    The ASIC will now be capable of overwriting previous characters 
-    displayed on the screen, using the Backspace key, as well as 
-    posess carriage return / line feed functionality. Time-
+    The ASIC will now be capable of overwriting previous characters displayed on the screen, using
+    the Backspace key, as well as posess carriage return / line feed functionality. Time-
     dependant, additional features that could be included are:
         - A flashing cursor to enable overwriting at the selected position (navigation 
-            with arrow keys)
+            with arrow keys, home, end)
         - Rudimentary line-copy and line-paste
         - The ability to write special characters, such braces, brackets, colons, etc.
         - ^The same, with lowercase letters
@@ -78,51 +81,89 @@ What is your backup plan if things don’t work out as planned?
     constrained.
 
 What hardware will you need beyond the DE2 board 
-    In addition to a display with VGA input,  a keyboard with PS/2 
-    output  is required for this project.
+    In addition to a display with VGA input, a keyboard with PS/2 
+    output is required for this project.
+
 
 Motivations
 -----------
 How does this project relate to the material covered in CSCB58?:
     This project will make use of a RAM module to keep the location and value of characters
     written on the VGA monitor. An adder will be needed in order to calulate successive positions
-    for each character to be written as well as each pixel within each character. Also a module will 
-    need to be created in order translate input from the keyboard. Finally the process of reading, 
-    then writing, or overwriting will be controlled by a finite state machine.
+    for each character to be written as well as each pixel within each character. Also a 
+    decoder module will be needed in order translate input from the keyboard. Some counters will
+    be needed to maintain the current character position and pixel position within that character.
+    Finally the process of reading, then writing, or overwriting will be controlled 
+    by a finite state machine.
 
 Why is this project interesting/cool (for CSCB58 students, and for non CSCB58 students?):
+    For Students of this course the interesting part of this project is not its actual function,
+    but the ideas in the process needed to make this project; to be able to diplay keyboard
+    input in a legible way and then to control the display and data in a user-friendly manner
+    is quite a challenge and rewarding, too.
 
-    For Students of this course the interesting part of this project is not its actual functionality
-    but the ideas in the process needed to make this project, to be able to translate the keyboard
-    input into a meaningful output and be able to also display it in an easily legible way.
-
-    For students who are not in this course this would be interesting as they would come to understand the 
-    complexity of a creating a machine which is thought to be as basic as a teleprompter.
+    For students who are not in this course this project could be viewed as a simple teleprompter 
+    or instant messaging device (2 required). Alternatively, it could become quite useful in 
+    combination with a microcontroller and/or persistance (each to be built by future B58 students, 
+    one day) as a stand-alone assembly IDE. We dream that this setup may become the standard way 
+    that B58 students practise writing assembly. 
 
 Why did you personally choose this project?:
+    For us, as computer science students, the choice of text editor can devolve into an 'unholy
+    war' (see vim vs. emacs). Although we sincerely doubt that an hardware implementation of any
+    such software would be superior in any appreciable regard, we don't doubt that this project
+    is more useful than the butterfly effect: https://xkcd.com/378/
+    
+    When browsing prior projects for inspiration, we found that the vast majority were games and
+    gimmics. Ideas that stood out in this regard were: a fellow student was considering building
+    a whole CPU, and one group last year built a layered keyboard. These projects captured our
+    imagination because they allowed for continued development and integration into larger systems
+    with real applicability. This kind of modularity and portability excited us, as computer
+    scientists. Perhaps in future years our project will be built upon to make games, IDEs, 
+    publishing machines, communication systems, or something so cool that we can't imagine it yet.
 
-    A text-based editor is known to and have been used by everyone. We decided to learn to re-create the
-    hardware composition of such a trivial program which is mostly taken for granted.
-    To do this we would have to use knowledge we have accumulated in all the labs and lectures
-    directly applying it to this project. The exciting part is realizeing how to bring together all bits
-    and pieces, expanding on all areas to meet our specific needs and creating a fully functional 
-    error-free text editor.
 
 Attributions
 ------------
 
+Quick Reference:
+    The following modules contain soley work from referenced sources:
+        - vga_*
+        - keyboard.v
+        - pages_RAM.*
+    The following modules contain some work from referenced sources:
+        - key2ascii.v
+        - black_320.mif
+        
+0. Top-level Module:
+    Design pattern and much inspiration drawn from Steve Engels' Labs 00-06 (esp. Lab06)
+    http://www.utsc.utoronto.ca/~bharrington/cscb58/labs.shtml
+    Usage permission as CSCB58 students
+    Copyright 2018 University of Toronto
+
 1. VGA Adapter Module:
     We directly used the VGA adapter downloaded from:
     http://www.utsc.utoronto.ca/~bharrington/cscb58/labs/lab6-part2.zip
-    Free usage permisision under Creative Commons License.
+    Free usage permisision under Creative Commons License
     Copyright 2006 Sam Vafaee, Copyright 2007 Tomasz S. Czajkowski
     
 
 2. Font:
     We based our font on the basis33 font downloaded from:
     http://dl.1001fonts.com/basis33.zip
-    Free usage permission under MIT License:
-    Copyright 2004, 2005 Tristan Gammer, Copyright 2014 Manchson.
+    Free usage permission under MIT License
+    Copyright 2004, 2005 Tristan Gammer, Copyright 2014 Manchson
+    
+3. Keyboard module (first):
+    We read, referenced, tested and eventualy rejected the keyboard module from:
+    http://students.iitk.ac.in/eclub/assets/tutorials/keyboard.pdf
+    We were unable to find usage permissions for this work. We will not use it.
+
+4. Keyboard Module (second):
+    We directly integrated the entirety of the keyboard.v, key2ascii and ps2_rx.v modules from:
+    https://github.com/jconenna/FPGA-Projects/tree/master/Keyboard_Interface
+    We obtained usage permission directly from the author, Joey Conenna, vi email,
+    dated March 14, 2018 between joe@armitage.com and embeddedthoughtsblog@gmail.com
 
 
 Updates
@@ -131,14 +172,41 @@ Updates
     Week 1
     ------
         - We successfully printed [A-Z] and [0-9] to arbitrary positions through the VGA.
+
         - We encountered an issue when attempting to output at standard VGA resolution 640x480:
             The VGA adapter provided for Lab06 has a maximum output resolution of 320x240, 
             so we may constrain editor to print a maximum of 40 characters width, unless we
             can find an alternative VGA module.
-        - We had extra time and resources, so we began the keyboard input driver, too. It 
-            currently accepts individual presses only (no shift-A, for example) and
-            works with our display hardware.
+            
+        - We had extra time and resources, so we began the keyboard input driver, too. 
+            We obtained a de-serializing module from IITK (keyboardRawData.v) and built a 
+            decoder for the scan codes it produces (keyboard_decoder.v). It currently accepts 
+            individual presses only (no shift-A, for example) and works with our display hardware.
+            
+        - After some failed attempts then research (unfortunate order), we discovered the 
+            difficulty of handling serialized data from the keyboard and in adapting the module we
+            had obtained to output distinct codes for simultaneous presses of shift and other 
+            keys. Instead, we found a new keyboard decoder module that had this behavior 
+            built-in. We then tested and integrated that.
             
     Week 2
     ------
-        -
+        - When we replaced the keyboard module with another, more advanced module (keyboard.v
+            and ps2_rx.v), it came with a decoder (key2ascii.v) that converts scan codes to ASCII
+            which was identical to the half-completed (upper-case only) one that we had already 
+            built (keyboard_decoder.v). It seemed silly to repeat the monkey-work of looking up 
+            (or producing with keyboard and reading from hex as we did) scan codes that we had yet
+            to add to our decoder (some special characters), so we began using the provided 
+            decoder. We now have added to it the necessary control characters we will need for our
+            next phase (cursor movement, overwriting).
+            
+        - We successfully implemented automatic character positioning and user-controlled line 
+            feed. We encountered a bug in the instantiation of the additional connections of the 
+            datapath and the FSM where the increment_pixel_counter signal was being sent to the 
+            increment_x_position_counter input, causing the characters to be spread across the 
+            line. This set us back some time.
+        
+        - We added lowercase letters and special characters available on standard US layout 
+            keyboards. This required both the creation of additional bitmaps (in char_decoder.v)
+            and the updates to key2ascii.v mentioned above.
+            
