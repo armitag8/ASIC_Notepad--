@@ -164,7 +164,7 @@ module datapath
         output reg [7:0] y_out,
         output reg [2:0] colour_out,
         output [7:0] pixel_counter,
-        output [5:0] line_counter,
+        output [5:0] line_pos_counter,
         output [5:0] x_pos_counter,
         output [3:0] y_pos_counter,
         input clk,
@@ -324,7 +324,7 @@ module control_FSM(
             .CLR(reset_cursor_pixel_counter)
         );
 
-    reg [3:0] current_state, next_state;
+    reg [4:0] current_state, next_state;
     reg cursor_colour, control_char;
     wire [3:0] cusor_pixel_counter;
     reg inc_cursor_pixel_counter, reset_cursor_pixel_counter;
