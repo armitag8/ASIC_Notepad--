@@ -100,7 +100,7 @@ module notepad_minus_minus
             .pixel_counter(pixel_counter_transfer),
             .x_pos_counter(x_pos_counter_transfer),
             .y_pos_counter(y_pos_counter_transfer),
-            .line_counter(line_pos_counter_transfer),
+            .line_pos_counter(line_pos_counter_transfer),
             .clk(CLOCK_50),
             .reset_n(~resetn),
             .colour_in(3'b010),
