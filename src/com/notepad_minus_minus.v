@@ -363,8 +363,8 @@ module control_FSM(
                 S_DEC_X_POS_PRE            = 5'd27,
                 S_DEC_Y_POS_PRE         = 5'd28,
                 S_END_PREV_PAGE            = 5'd29,
-                S_INC_X_POS_WAIT        = 5'd30,
-                S_DEC_X_POS_WAIT        = 5'd31;
+                S_INC_X_POS_PRE        = 5'd30,
+                S_INC_Y_POS_PRE        = 5'd31;
                 
     localparam  PGUP        = 7'h02, // STX
                 PGDWN       = 7'h03, // ETX
@@ -409,7 +409,6 @@ module control_FSM(
                             else
                             begin
                                 control_char = 1'b1;
-                                cursor_colour = 1'b0;
                                 next_state = S_PLOT_CURSOR;
                             end
                         end
@@ -439,7 +438,7 @@ module control_FSM(
             
             S_START_LINE:           next_state = S_PLOT_CURSOR;
             S_END_LINE:             next_state = S_PLOT_CURSOR;
-            S_START_NEXT_LINE       next_state = S_INC_Y_POS_PRE;
+            S_START_NEXT_LINE:      next_state = S_INC_Y_POS_PRE;
             S_END_PREV_LINE:        next_state = S_DEC_Y_POS_PRE;
             
             S_SCROLL_DOWN:          next_state = S_PLOT_CURSOR;
@@ -473,11 +472,13 @@ module control_FSM(
             S_PLOT_CURSOR: 
                                     begin
                                         shift_for_cursor            = 1'b1;
-                                        plot                        = 1'b1;
+                                        if (cursor_colour)
+                                            plot                    = 1'b1;
                                     end
             S_CURSOR_INC:               inc_cursor_pixel_counter    = 1'b1;
             S_FLIP_CURSOR_COLOUR:       cursor_colour               = ~cursor_colour;
             
+            S_CHECK_CHAR:           cursor_colour                   = 1'b0;
             S_SAVE_CHAR:
                                     begin
                                         load_char                   = 1'b1;
