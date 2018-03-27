@@ -1,4 +1,5 @@
-module rate_divider(
+module rate_divider
+    (
         output reg OUT,
         input IN
     );
