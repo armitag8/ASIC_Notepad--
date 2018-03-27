@@ -359,9 +359,13 @@ module control_FSM(
                 S_DEC_Y_POS             = 5'd22,
                 S_SCROLL_UP             = 5'd23,
                 S_SCROLL_DOWN           = 5'd24,
-                S_END_PREV_LINE         = 5'd25;
+                S_END_PREV_LINE         = 5'd25,
+                S_DEC_X_POS_PRE            = 5'd27,
+                S_DEC_Y_POS_PRE         = 5'd28,
+                S_END_PREV_PAGE            = 5'd29,
+                S_INC_X_POS_WAIT        = 5'd30,
+                S_DEC_X_POS_WAIT        = 5'd31;
                 
-
     localparam  PGUP        = 7'h02, // STX
                 PGDWN       = 7'h03, // ETX
                 HOME        = 7'h0D, // CR
@@ -380,6 +384,7 @@ module control_FSM(
             S_CURSOR_INC_WAIT:      next_state = char_ready ? S_CHECK_CHAR : cusor_pixel_counter <= MAX_CURSOR_W ? S_PLOT_CURSOR : S_FLIP_CURSOR_COLOUR;
             S_FLIP_CURSOR_COLOUR:   next_state = char_ready ? S_CHECK_CHAR : S_CURSOR_WAIT;
             S_CURSOR_WAIT:          next_state = control_char || char_ready ? S_CHECK_CHAR : half_hz_clock ? S_PLOT_CURSOR : S_CURSOR_WAIT;
+            
             S_CHECK_CHAR:   
                         begin
                             if (ascii_code > 7'h1F && ascii_code < 7'h7F) // if a printing char
@@ -397,7 +402,8 @@ module control_FSM(
                                     RIGHT:  next_state = x_pos_counter_in < MAX_X_POS ? S_INC_X_POS : S_START_NEXT_LINE;
                                     HOME:   next_state = S_START_LINE;
                                     END:    next_state = S_END_LINE;
-                                    
+                                    CR:     next_state = S_START_NEXT_LINE;
+                                    default: next_state = S_PLOT_CURSOR;
                                 endcase    
                             end
                             else
@@ -409,14 +415,36 @@ module control_FSM(
                         end
             S_SAVE_CHAR:            next_state = S_SAVE_CHAR_WAIT;
             S_SAVE_CHAR_WAIT:       next_state = S_PLOT_PIXEL;
+            
             S_PLOT_PIXEL:           next_state = S_PLOT_WAIT;
             S_PLOT_WAIT:            next_state = S_INC_PIXEL;
             S_INC_PIXEL:            next_state = S_INC_PIXEL_WAIT;
             S_INC_PIXEL_WAIT:       next_state = (pixel_counter_in <= CHAR_SIZE) ? S_PLOT_PIXEL : S_INC_X_POS;
+            
+            S_INC_X_POS_PRE:        next_state = (x_pos_counter_in < MAX_X_POS) ? S_INC_X_POS : S_START_NEXT_LINE;
             S_INC_X_POS:            next_state = S_INC_X_POS_WAIT;
-            S_INC_X_POS_WAIT:       next_state = (x_pos_counter_in <= MAX_X_POS) ? S_PLOT_CURSOR : S_START_NEXT_LINE;
+            S_INC_X_POS_WAIT:       next_state = S_PLOT_CURSOR;
+            
+            S_DEC_X_POS_PRE:        next_state = (x_pos_counter_in > 0) ? S_DEC_X_POS : S_END_PREV_LINE;
+            S_DEC_X_POS:            next_state = S_DEC_X_POS_WAIT
+            S_DEC_X_POS_WAIT:       next_state = S_PLOT_CURSOR;
+            
+            S_INC_Y_POS_PRE:        next_state = (y_pos_counter_in < MAX_Y_POS) ? S_INC_Y_POS : S_SCROLL_DOWN;
             S_INC_Y_POS:            next_state = S_INC_Y_POS_WAIT;
-            S_INC_Y_POS_WAIT:       next_state = (y_pos_counter_in <= MAX_Y_POS) ? S_PLOT_CURSOR : S_START_NEXT_PAGE;
+            S_INC_Y_POS_WAIT:       next_state = S_PLOT_CURSOR;
+            
+            S_DEC_Y_POS_PRE:        next_state = (y_pos_counter_in > 0) ? S_DEC_Y_POS : S_SCROLL_UP;
+            S_DEC_Y_POS:            next_state = S_DEC_Y_POS_WAIT;
+            S_DEC_Y_POS_WAIT:       next_state = S_PLOT_CURSOR;
+            
+            S_START_LINE:           next_state = S_PLOT_CURSOR;
+            S_END_LINE:             next_state = S_PLOT_CURSOR;
+            S_START_NEXT_LINE       next_state = S_INC_Y_POS_PRE;
+            S_END_PREV_LINE:        next_state = S_DEC_Y_POS_PRE;
+            
+            S_SCROLL_DOWN:          next_state = S_PLOT_CURSOR;
+            S_SCROLL_UP:            next_state = S_PLOT_CURSOR;
+            
             default:                next_state = S_PLOT_CURSOR;
         endcase
     end // state_table
@@ -425,11 +453,19 @@ module control_FSM(
     begin: enable_signals
         plot = 1'b0;
         load_char = 1'b0;
+        inc_line_pos_counter = 1'b0;
+        dec_line_pos_counter = 1'b0;
+        reset_line_pos_counter = 1'b0;
+        line_parallel = 1'b0;
         inc_pixel_counter = 1'b0;
         reset_pixel_counter = 1'b0;
         inc_x_pos_counter = 1'b0;
+        dec_x_pos_counter = 1'b0;
+        x_load = 1'b0;
         reset_x_pos_counter = 1'b0;
         inc_y_pos_counter = 1'b0;
+        dec_y_pos_counter = 1'b0;
+        y_load = 1'b0;
         reset_y_pos_counter = 1'b0;
         inc_cursor_pixel_counter = 1'b0;
         reset_cursor_pixel_counter = 1'b0;
@@ -441,16 +477,37 @@ module control_FSM(
                                     end
             S_CURSOR_INC:               inc_cursor_pixel_counter    = 1'b1;
             S_FLIP_CURSOR_COLOUR:       cursor_colour               = ~cursor_colour;
+            
             S_SAVE_CHAR:
                                     begin
                                         load_char                   = 1'b1;
                                         reset_pixel_counter         = 1'b1;
                                         shift_for_cursor            = 1'b0;
                                     end
+                                    
             S_PLOT_PIXEL:               plot                        = 1'b1;
             S_INC_PIXEL:                inc_pixel_counter           = 1'b1;
+            
+            S_SCROLL_DOWN:              dec_line_pos_counter        = 1'b1;
+            S_SCROLL_UP:                inc_line_pos_counter        = 1'b1;
+            
+            S_START_NEXT_LINE:          reset_x_pos_counter         = 1'b1;
+            S_END_PREV_LINE:        begin
+                                        x_load                      = MAX_X_POS;
+                                        x_parallel                  = 1'b1;
+                                    end
+            
             S_INC_X_POS:                inc_x_pos_counter           = 1'b1;
             S_INC_Y_POS:                inc_y_pos_counter           = 1'b1;
+            S_DEC_X_POS:                dec_x_pos_counter           = 1'b1;
+            S_DEC_Y_POS:                dec_y_pos_counter           = 1'b1;
+            
+            S_START_LINE:               reset_x_pos_counter         = 1'b1;
+            S_END_LINE:             begin
+                                        x_load                      = MAX_X_POS;
+                                        x_parallel                  = 1'b1;
+                                    end
+            
         endcase
     end // enable_signals
     
