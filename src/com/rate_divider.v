@@ -4,7 +4,7 @@ module rate_divider
         input IN
     );
     
-    reg [27:0] COUNTER, MAX;
+    reg [27:0] COUNTER;
     localparam MAX <= 28'd100_000_000;
     
     always @(posedge IN)
