@@ -24,7 +24,7 @@ module counter_6bit
             else if (CLK == 1'b1 & decrease == 1'b1)
                Q_OUT[5:0] <= Q_OUT[5:0] - 6'b00_0001;
             else if (CLK == 1'b1 & parallel == 1'b1)
-               Q_OUT[3:0] <= load[5:0];
+               Q_OUT[5:0] <= load[5:0];
         end
     end
 
