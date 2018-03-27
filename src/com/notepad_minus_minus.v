@@ -10,6 +10,7 @@ module notepad_minus_minus
         output VGA_VS,                              //    VGA V_SYNC
         output VGA_BLANK_N,                         //    VGA BLANK
         output VGA_SYNC_N,                          //    VGA SYNC
+		  output [6:0] HEX0,
         output [9:0] VGA_R,                         //    VGA Red[9:0]
         output [9:0] VGA_G,                         //    VGA Green[9:0]
         output [9:0] VGA_B                          //    VGA Blue[9:0]
@@ -72,6 +73,11 @@ module notepad_minus_minus
     defparam VGA.BITS_PER_COLOUR_CHANNEL = 1;
     defparam VGA.BACKGROUND_IMAGE = "black_320.mif";
     
+	 hex_display lol(
+	          .IN(x_load[3:0]),
+	          .OUT(HEX0)
+	);
+	 
     // Instantiate keyboard input
     keyboard kd
         (
@@ -399,10 +405,10 @@ module control_FSM(
                             begin
                                 control_char = 1'b0;
                                 case(ascii_code)
-                                    UP:     next_state = y_pos_counter_in > 0 ? S_DEC_Y_POS : S_SCROLL_UP;
-                                    LEFT:   next_state = x_pos_counter_in > 0 ? S_DEC_X_POS : S_END_PREV_LINE;
-                                    DOWN:   next_state = y_pos_counter_in < MAX_Y_POS ? S_INC_Y_POS : S_SCROLL_DOWN;
-                                    RIGHT:  next_state = x_pos_counter_in < MAX_X_POS ? S_INC_X_POS : S_START_NEXT_LINE;
+                                    UP:     next_state = S_DEC_Y_POS_PRE;
+                                    LEFT:   next_state = S_DEC_X_POS_PRE;
+                                    DOWN:   next_state = S_INC_Y_POS_PRE;
+                                    RIGHT:  next_state = S_INC_X_POS_PRE;
                                     HOME:   next_state = S_START_LINE;
                                     END:    next_state = S_END_LINE;
                                     ENTER:  next_state = S_START_NEXT_LINE;
@@ -421,7 +427,7 @@ module control_FSM(
             S_PLOT_PIXEL:           next_state = S_PLOT_WAIT;
             S_PLOT_WAIT:            next_state = S_INC_PIXEL;
             S_INC_PIXEL:            next_state = S_INC_PIXEL_WAIT;
-            S_INC_PIXEL_WAIT:       next_state = (pixel_counter_in <= CHAR_SIZE) ? S_PLOT_PIXEL : S_INC_X_POS;
+            S_INC_PIXEL_WAIT:       next_state = (pixel_counter_in <= CHAR_SIZE) ? S_PLOT_PIXEL : S_INC_X_POS_PRE;
             
             S_INC_X_POS_PRE:        next_state = (x_pos_counter_in < MAX_X_POS) ? S_INC_X_POS : S_START_NEXT_LINE;
             S_INC_X_POS:            next_state = S_INC_X_POS_WAIT;
@@ -454,6 +460,8 @@ module control_FSM(
     always @(negedge clk)
     begin: enable_signals
         plot = 1'b0;
+		  x_parallel = 1'b0;
+		  y_parallel = 1'b0;
         load_char = 1'b0;
         inc_line_pos_counter = 1'b0;
         dec_line_pos_counter = 1'b0;
@@ -463,7 +471,6 @@ module control_FSM(
         reset_pixel_counter = 1'b0;
         inc_x_pos_counter = 1'b0;
         dec_x_pos_counter = 1'b0;
-        x_load = 1'b0;
         reset_x_pos_counter = 1'b0;
         inc_y_pos_counter = 1'b0;
         dec_y_pos_counter = 1'b0;
@@ -475,8 +482,6 @@ module control_FSM(
             S_PLOT_CURSOR: 
                                     begin
                                         shift_for_cursor            = 1'b1;
-                                        if (cursor_colour)
-                                            plot                    = 1'b1;
                                     end
             S_CURSOR_INC:               inc_cursor_pixel_counter    = 1'b1;
             S_FLIP_CURSOR_COLOUR:       cursor_colour               = ~cursor_colour;
