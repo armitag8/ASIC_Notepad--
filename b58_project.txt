@@ -222,3 +222,5 @@ Updates
             keyboards. This required both the creation of additional bitmaps (in char_decoder.v)
             and the updates to key2ascii.v mentioned above.
             
+        - We built RAM... (attrib, too)
+            
