@@ -382,9 +382,10 @@ module control_FSM(
                 DOWN        = 7'h13, // DC3
                 RIGHT       = 7'h14, // DC3
                 END         = 7'h17, // ETB
-					 ENTER		 = 7'h0A; // LF
+					 ENTER		 = 7'h0A, // LF
+					 NULL        = 7'h00; // NULL
                 
-    always @(*)
+    always @(posedge clk)
     begin: state_table
         case (current_state)
             S_PLOT_CURSOR:          next_state = char_ready ? S_CHECK_CHAR : S_PLOT_CURSOR_WAIT;
@@ -392,11 +393,11 @@ module control_FSM(
             S_CURSOR_INC:           next_state = char_ready ? S_CHECK_CHAR : S_CURSOR_INC_WAIT;
             S_CURSOR_INC_WAIT:      next_state = char_ready ? S_CHECK_CHAR : cusor_pixel_counter <= MAX_CURSOR_W ? S_PLOT_CURSOR : S_FLIP_CURSOR_COLOUR;
             S_FLIP_CURSOR_COLOUR:   next_state = char_ready ? S_CHECK_CHAR : S_CURSOR_WAIT;
-            S_CURSOR_WAIT:          next_state = (char_ready) ? S_CHECK_CHAR : half_hz_clock ? S_PLOT_CURSOR : S_CURSOR_WAIT;
+            S_CURSOR_WAIT:          next_state = (char_ready || control_char) ? S_CHECK_CHAR : half_hz_clock ? S_PLOT_CURSOR : S_CURSOR_WAIT;
             
             S_CHECK_CHAR:   
                         begin
-                            if (ascii_code > 7'h1F && ascii_code < 7'h7F) // if a printing char
+                            if (ascii_code > 7'h1F && ascii_code < 7'h7F && ascii_code != NULL) // if a printing char
                             begin
                                 control_char = 1'b0;
                                 next_state =  S_SAVE_CHAR;
