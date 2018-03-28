@@ -392,7 +392,7 @@ module control_FSM(
             S_CURSOR_INC:           next_state = char_ready ? S_CHECK_CHAR : S_CURSOR_INC_WAIT;
             S_CURSOR_INC_WAIT:      next_state = char_ready ? S_CHECK_CHAR : cusor_pixel_counter <= MAX_CURSOR_W ? S_PLOT_CURSOR : S_FLIP_CURSOR_COLOUR;
             S_FLIP_CURSOR_COLOUR:   next_state = char_ready ? S_CHECK_CHAR : S_CURSOR_WAIT;
-            S_CURSOR_WAIT:          next_state = (control_char || char_ready) ? S_CHECK_CHAR : half_hz_clock ? S_PLOT_CURSOR : S_CURSOR_WAIT;
+            S_CURSOR_WAIT:          next_state = (char_ready) ? S_CHECK_CHAR : half_hz_clock ? S_PLOT_CURSOR : S_CURSOR_WAIT;
             
             S_CHECK_CHAR:   
                         begin
@@ -482,6 +482,7 @@ module control_FSM(
             S_PLOT_CURSOR: 
                                     begin
                                         shift_for_cursor            = 1'b1;
+
                                     end
             S_CURSOR_INC:               inc_cursor_pixel_counter    = 1'b1;
             S_FLIP_CURSOR_COLOUR:       cursor_colour               = ~cursor_colour;
