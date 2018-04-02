@@ -61,8 +61,8 @@ always @*
             8'h4a: ascii_code = 8'h3F;   // ?
             8'h29: ascii_code = 8'h20;   // space
             8'h5a: ascii_code = 8'h0A;   // LF: Return (\n)
-            8'h66: ascii_code = 8'h08;   // backspace
-            8'h0D: ascii_code = 8'h09;   // horizontal tab
+            8'h66: ascii_code = 8'h08;   // BS: backspace
+            8'h0D: ascii_code = 8'h09;   // TAB: horizontal tab
             /* We added all these to control cursor movement, behavior */
             8'h75: ascii_code = 8'h11;   // DC1: Up Arrow
             8'h6B: ascii_code = 8'h12;   // DC2: Left Arrow
@@ -133,8 +133,8 @@ always @*
             8'h4a: ascii_code = 8'h2F;   // /
             8'h29: ascii_code = 8'h20;   // space
             8'h5a: ascii_code = 8'h0A;   // LF: Return (\n)
-            8'h66: ascii_code = 8'h08;   // backspace
-            8'h0D: ascii_code = 8'h09;   // horizontal tab
+            8'h66: ascii_code = 8'h08;   // BS: backspace
+            8'h0D: ascii_code = 8'h09;   // TAB: horizontal tab
             /* Again, we added all these to control cursor movement, behavior */
             8'h75: ascii_code = 8'h11;   // DC1: Up Arrow
             8'h6B: ascii_code = 8'h12;   // DC2: Left Arrow
