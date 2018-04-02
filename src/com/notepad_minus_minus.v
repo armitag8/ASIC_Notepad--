@@ -10,7 +10,6 @@ module notepad_minus_minus
         output VGA_VS,                              //    VGA V_SYNC
         output VGA_BLANK_N,                         //    VGA BLANK
         output VGA_SYNC_N,                          //    VGA SYNC
-		  output [6:0] HEX0,
         output [9:0] VGA_R,                         //    VGA Red[9:0]
         output [9:0] VGA_G,                         //    VGA Green[9:0]
         output [9:0] VGA_B                          //    VGA Blue[9:0]
@@ -33,6 +32,7 @@ module notepad_minus_minus
     wire [5:0] line_load;
     wire line_parallel;
     wire [3:0] y_pos_counter_transfer;
+    wire [3:0] cursor_pixel_counter_transfer;
     wire [3:0] y_load;
     wire y_parallel;
     wire inc_pixel_counter_transfer, dec_x_pos_counter_transfer, inc_x_pos_counter_transfer, 
@@ -40,7 +40,7 @@ module notepad_minus_minus
         dec_line_pos_counter_transfer;
     wire reset_pixel_counter_transfer, reset_x_pos_counter_transfer, reset_y_pos_counter_transfer,
         reset_line_pos_counter_transfer;
-    wire shift_for_cursor_transfer;
+    wire shift_for_cursor_transfer, plot_cursor_transfer;
     // Create wires used to transfer keyboard input to datapath and FSM
     wire [6:0] ASCII_value;
     wire [7:0] kb_scan_code;
@@ -72,11 +72,6 @@ module notepad_minus_minus
     defparam VGA.MONOCHROME = "FALSE";
     defparam VGA.BITS_PER_COLOUR_CHANNEL = 1;
     defparam VGA.BACKGROUND_IMAGE = "black_320.mif";
-    
-	 hex_display lol(
-	          .IN(x_load[3:0]),
-	          .OUT(HEX0)
-	);
 	 
     // Instantiate keyboard input
     keyboard kd
@@ -110,8 +105,10 @@ module notepad_minus_minus
             .clk(CLOCK_50),
             .reset_n(~resetn),
             .colour_in(3'b010),
+            .plot_cursor(plot_cursor_transfer),
             .inc_pixel_counter(inc_pixel_counter_transfer),
             .reset_pixel_counter(reset_pixel_counter_transfer),
+            .cursor_pixel_counter(cursor_pixel_counter_transfer),
             .inc_x_pos_counter(inc_x_pos_counter_transfer),
             .dec_x_pos_counter(dec_x_pos_counter_transfer),
             .x_load(x_load),
@@ -153,9 +150,11 @@ module notepad_minus_minus
             .y_parallel(y_parallel),
             .reset_y_pos_counter(reset_y_pos_counter_transfer),
             .shift_for_cursor(shift_for_cursor_transfer),
+            .cursor_colour(plot_cursor_transfer),
+            .cursor_pixel_counter(cursor_pixel_counter_transfer),
             .clk(CLOCK_50),
             .reset_n(~resetn),
-            .char_ready(kb_sc_ready),
+            .char_available(kb_sc_ready),
             .pixel_counter_in(pixel_counter_transfer),
             .x_pos_counter_in(x_pos_counter_transfer),
             .y_pos_counter_in(y_pos_counter_transfer),
@@ -178,6 +177,8 @@ module datapath
         input [2:0] colour_in,
         input inc_pixel_counter,
         input reset_pixel_counter,
+        input plot_cursor,
+        input [3:0] cursor_pixel_counter,
         input inc_x_pos_counter,
         input dec_x_pos_counter,
         input [5:0] x_load,
@@ -265,7 +266,7 @@ module datapath
      
     always @(negedge clk)
     begin: colour_activator
-        if (top_shifter_bit)
+        if (top_shifter_bit || plot_cursor)
             colour_out = colour_in;
         else
             colour_out = 3'b000;
@@ -274,7 +275,10 @@ module datapath
     always @(posedge clk)
     begin: coordinate_shifter
         if (shift_for_cursor)
+          begin
             y_out = (y_pos_counter << 4) + 4'd13;
+            x_out = (x_pos_counter << 3) + cursor_pixel_counter;
+          end
         else if (~inc_pixel_counter)
         begin
             x_out = (x_pos_counter << 3) + pixel_counter[2:0];
@@ -304,15 +308,19 @@ module control_FSM(
         output reg y_parallel,
         output reg reset_y_pos_counter,
         output reg shift_for_cursor,
+        output reg cursor_colour,
+        output [3:0] cursor_pixel_counter,
         input clk,
         input reset_n,
-        input char_ready,
+        input char_available,
         input [7:0] pixel_counter_in,
         input [5:0] line_pos_counter_in,
         input [5:0] x_pos_counter_in,
         input [3:0] y_pos_counter_in,
         input [6:0] ascii_code
     );
+	 
+	 reg char_ready;
     
     // Instantiate Rate Divider
     rate_divider RD
@@ -324,16 +332,16 @@ module control_FSM(
     // Insantiate Cursor pixel counter
     counter_4bit cpc
         (
-            .Q_OUT(cusor_pixel_counter),
+            .Q_OUT(cursor_pixel_counter),
             .increase(inc_cursor_pixel_counter),
             .CLK(clk),
             .CLR(reset_cursor_pixel_counter)
         );
 
     reg [5:0] current_state, next_state;
-    reg cursor_colour, control_char;
-    wire [3:0] cusor_pixel_counter;
+    reg control_char;
     reg inc_cursor_pixel_counter, reset_cursor_pixel_counter;
+    wire half_hz_clock;
 
     localparam  CHAR_SIZE             = 8'd127,
                 MAX_X_POS             = 6'd39,
@@ -366,6 +374,7 @@ module control_FSM(
                 S_SCROLL_UP             = 6'd23,
                 S_SCROLL_DOWN           = 6'd24,
                 S_END_PREV_LINE         = 6'd25,
+                S_PLOT_CURSOR2          = 6'd26,
                 S_DEC_X_POS_PRE         = 6'd27,
                 S_DEC_Y_POS_PRE         = 6'd28,
                 S_END_PREV_PAGE         = 6'd29,
@@ -388,16 +397,17 @@ module control_FSM(
     always @(posedge clk)
     begin: state_table
         case (current_state)
-            S_PLOT_CURSOR:          next_state = char_ready ? S_CHECK_CHAR : S_PLOT_CURSOR_WAIT;
+            S_PLOT_CURSOR:          next_state = S_PLOT_CURSOR2;
+            S_PLOT_CURSOR2:			next_state = char_ready ? S_CHECK_CHAR : S_PLOT_CURSOR_WAIT;
             S_PLOT_CURSOR_WAIT:     next_state = char_ready ? S_CHECK_CHAR : S_CURSOR_INC;
             S_CURSOR_INC:           next_state = char_ready ? S_CHECK_CHAR : S_CURSOR_INC_WAIT;
-            S_CURSOR_INC_WAIT:      next_state = char_ready ? S_CHECK_CHAR : cusor_pixel_counter <= MAX_CURSOR_W ? S_PLOT_CURSOR : S_FLIP_CURSOR_COLOUR;
+            S_CURSOR_INC_WAIT:      next_state = char_ready ? S_CHECK_CHAR : cursor_pixel_counter <= MAX_CURSOR_W ? S_PLOT_CURSOR : S_FLIP_CURSOR_COLOUR;
             S_FLIP_CURSOR_COLOUR:   next_state = char_ready ? S_CHECK_CHAR : S_CURSOR_WAIT;
             S_CURSOR_WAIT:          next_state = (char_ready || control_char) ? S_CHECK_CHAR : half_hz_clock ? S_PLOT_CURSOR : S_CURSOR_WAIT;
             
             S_CHECK_CHAR:   
                         begin
-                            if (ascii_code > 7'h1F && ascii_code < 7'h7F && ascii_code != NULL) // if a printing char
+                            if (ascii_code > 7'h1F && ascii_code < 7'h7F) // if a printing char
                             begin
                                 control_char = 1'b0;
                                 next_state =  S_SAVE_CHAR;
@@ -416,7 +426,7 @@ module control_FSM(
                                     default: next_state = S_PLOT_CURSOR;
                                 endcase    
                             end
-                            else
+                            else // if control character is pressed
                             begin
                                 control_char = 1'b1;
                                 next_state = S_PLOT_CURSOR;
@@ -475,20 +485,23 @@ module control_FSM(
         reset_x_pos_counter = 1'b0;
         inc_y_pos_counter = 1'b0;
         dec_y_pos_counter = 1'b0;
-        y_load = 1'b0;
         reset_y_pos_counter = 1'b0;
         inc_cursor_pixel_counter = 1'b0;
         reset_cursor_pixel_counter = 1'b0;
+		  char_ready = control_char ? 1'b0 : char_available;
         case (current_state)
-            S_PLOT_CURSOR: 
-                                    begin
-                                        shift_for_cursor            = 1'b1;
-
-                                    end
+            S_PLOT_CURSOR:              shift_for_cursor            = 1'b1;
+            S_PLOT_CURSOR2:             plot                        = 1'b1;
             S_CURSOR_INC:               inc_cursor_pixel_counter    = 1'b1;
-            S_FLIP_CURSOR_COLOUR:       cursor_colour               = ~cursor_colour;
-            
-            S_CHECK_CHAR:           cursor_colour                   = 1'b0;
+            S_FLIP_CURSOR_COLOUR:   begin
+                                        cursor_colour               = ~cursor_colour;
+                                        reset_cursor_pixel_counter  = 1'b1;
+                                    end
+          
+            S_CHECK_CHAR:           begin
+													cursor_colour                = 1'b0;
+                                       reset_cursor_pixel_counter   = 1'b1;
+												end
             S_SAVE_CHAR:
                                     begin
                                         load_char                   = 1'b1;
