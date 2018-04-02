@@ -10,6 +10,7 @@ module notepad_minus_minus
         output VGA_VS,                              //    VGA V_SYNC
         output VGA_BLANK_N,                         //    VGA BLANK
         output VGA_SYNC_N,                          //    VGA SYNC
+		  output [6:0] HEX0,
         output [9:0] VGA_R,                         //    VGA Red[9:0]
         output [9:0] VGA_G,                         //    VGA Green[9:0]
         output [9:0] VGA_B                          //    VGA Blue[9:0]
@@ -72,6 +73,11 @@ module notepad_minus_minus
     defparam VGA.BITS_PER_COLOUR_CHANNEL = 1;
     defparam VGA.BACKGROUND_IMAGE = "black_320.mif";
     
+	 hex_display lol(
+	          .IN(x_load[3:0]),
+	          .OUT(HEX0)
+	);
+	 
     // Instantiate keyboard input
     keyboard kd
         (
@@ -284,18 +290,18 @@ module control_FSM(
         output reg reset_pixel_counter,
         output reg inc_line_pos_counter,
         output reg dec_line_pos_counter,
-        output [5:0] line_load,
-        output line_parallel,
+        output reg [5:0] line_load,
+        output reg line_parallel,
         output reg reset_line_pos_counter,
         output reg inc_x_pos_counter,
         output reg dec_x_pos_counter,
-        output [5:0] x_load,
-        output x_parallel,
+        output reg [5:0] x_load,
+        output reg x_parallel,
         output reg reset_x_pos_counter,
         output reg inc_y_pos_counter,
         output reg dec_y_pos_counter,
-        output [3:0] y_load,
-        output y_parallel,
+        output reg [3:0] y_load,
+        output reg y_parallel,
         output reg reset_y_pos_counter,
         output reg shift_for_cursor,
         input clk,
@@ -324,7 +330,7 @@ module control_FSM(
             .CLR(reset_cursor_pixel_counter)
         );
 
-    reg [4:0] current_state, next_state;
+    reg [5:0] current_state, next_state;
     reg cursor_colour, control_char;
     wire [3:0] cusor_pixel_counter;
     reg inc_cursor_pixel_counter, reset_cursor_pixel_counter;
@@ -334,34 +340,40 @@ module control_FSM(
                 MAX_Y_POS             = 4'd14,
                 MAX_CURSOR_W          = 4'd7;
                 
-    localparam  S_PLOT_CURSOR           = 5'd0,
-                S_PLOT_CURSOR_WAIT      = 5'd1,
-                S_CURSOR_INC            = 5'd2,
-                S_CURSOR_INC_WAIT       = 5'd3,
-                S_FLIP_CURSOR_COLOUR    = 5'd4,
-                S_CURSOR_WAIT           = 5'd5,
-                S_CHECK_CHAR            = 5'd6,
-                S_SAVE_CHAR             = 5'd7,
-                S_SAVE_CHAR_WAIT        = 5'd8,
-                S_PLOT_PIXEL            = 5'd9,
-                S_PLOT_WAIT             = 5'd10,
-                S_INC_PIXEL             = 5'd11,
-                S_INC_PIXEL_WAIT        = 5'd12,
-                S_INC_X_POS             = 5'd13,
-                S_INC_X_POS_WAIT        = 5'd14,
-                S_INC_Y_POS             = 5'd15,
-                S_INC_Y_POS_WAIT        = 5'd16,
-                S_START_NEXT_LINE       = 5'd17,
-                S_START_LINE            = 5'd18,
-                S_END_LINE              = 5'd19,
-                S_START_NEXT_PAGE       = 5'd20,
-                S_DEC_X_POS             = 5'd21,
-                S_DEC_Y_POS             = 5'd22,
-                S_SCROLL_UP             = 5'd23,
-                S_SCROLL_DOWN           = 5'd24,
-                S_END_PREV_LINE         = 5'd25;
+    localparam  S_PLOT_CURSOR           = 6'd0,
+                S_PLOT_CURSOR_WAIT      = 6'd1,
+                S_CURSOR_INC            = 6'd2,
+                S_CURSOR_INC_WAIT       = 6'd3,
+                S_FLIP_CURSOR_COLOUR    = 6'd4,
+                S_CURSOR_WAIT           = 6'd5,
+                S_CHECK_CHAR            = 6'd6,
+                S_SAVE_CHAR             = 6'd7,
+                S_SAVE_CHAR_WAIT        = 6'd8,
+                S_PLOT_PIXEL            = 6'd9,
+                S_PLOT_WAIT             = 6'd10,
+                S_INC_PIXEL             = 6'd11,
+                S_INC_PIXEL_WAIT        = 6'd12,
+                S_INC_X_POS             = 6'd13,
+                S_INC_X_POS_WAIT        = 6'd14,
+                S_INC_Y_POS             = 6'd15,
+                S_INC_Y_POS_WAIT        = 6'd16,
+                S_START_NEXT_LINE       = 6'd17,
+                S_START_LINE            = 6'd18,
+                S_END_LINE              = 6'd19,
+                S_START_NEXT_PAGE       = 6'd20,
+                S_DEC_X_POS             = 6'd21,
+                S_DEC_Y_POS             = 6'd22,
+                S_SCROLL_UP             = 6'd23,
+                S_SCROLL_DOWN           = 6'd24,
+                S_END_PREV_LINE         = 6'd25,
+                S_DEC_X_POS_PRE         = 6'd27,
+                S_DEC_Y_POS_PRE         = 6'd28,
+                S_END_PREV_PAGE         = 6'd29,
+                S_INC_X_POS_PRE         = 6'd30,
+                S_INC_Y_POS_PRE         = 6'd31,
+					 S_DEC_X_POS_WAIT			 = 6'd32,
+					 S_DEC_Y_POS_WAIT			 = 6'd33;
                 
-
     localparam  PGUP        = 7'h02, // STX
                 PGDWN       = 7'h03, // ETX
                 HOME        = 7'h0D, // CR
@@ -369,9 +381,11 @@ module control_FSM(
                 LEFT        = 7'h12, // DC2
                 DOWN        = 7'h13, // DC3
                 RIGHT       = 7'h14, // DC3
-                END         = 7'h17; // ETB
+                END         = 7'h17, // ETB
+					 ENTER		 = 7'h0A, // LF
+					 NULL        = 7'h00; // NULL
                 
-    always @(*)
+    always @(posedge clk)
     begin: state_table
         case (current_state)
             S_PLOT_CURSOR:          next_state = char_ready ? S_CHECK_CHAR : S_PLOT_CURSOR_WAIT;
@@ -379,10 +393,11 @@ module control_FSM(
             S_CURSOR_INC:           next_state = char_ready ? S_CHECK_CHAR : S_CURSOR_INC_WAIT;
             S_CURSOR_INC_WAIT:      next_state = char_ready ? S_CHECK_CHAR : cusor_pixel_counter <= MAX_CURSOR_W ? S_PLOT_CURSOR : S_FLIP_CURSOR_COLOUR;
             S_FLIP_CURSOR_COLOUR:   next_state = char_ready ? S_CHECK_CHAR : S_CURSOR_WAIT;
-            S_CURSOR_WAIT:          next_state = control_char || char_ready ? S_CHECK_CHAR : half_hz_clock ? S_PLOT_CURSOR : S_CURSOR_WAIT;
+            S_CURSOR_WAIT:          next_state = (char_ready || control_char) ? S_CHECK_CHAR : half_hz_clock ? S_PLOT_CURSOR : S_CURSOR_WAIT;
+            
             S_CHECK_CHAR:   
                         begin
-                            if (ascii_code > 7'h1F && ascii_code < 7'h7F) // if a printing char
+                            if (ascii_code > 7'h1F && ascii_code < 7'h7F && ascii_code != NULL) // if a printing char
                             begin
                                 control_char = 1'b0;
                                 next_state =  S_SAVE_CHAR;
@@ -391,32 +406,54 @@ module control_FSM(
                             begin
                                 control_char = 1'b0;
                                 case(ascii_code)
-                                    UP:     next_state = y_pos_counter_in > 0 ? S_DEC_Y_POS : S_SCROLL_UP;
-                                    LEFT:   next_state = x_pos_counter_in > 0 ? S_DEC_X_POS : S_END_PREV_LINE;
-                                    DOWN:   next_state = y_pos_counter_in < MAX_Y_POS ? S_INC_Y_POS : S_SCROLL_DOWN;
-                                    RIGHT:  next_state = x_pos_counter_in < MAX_X_POS ? S_INC_X_POS : S_START_NEXT_LINE;
+                                    UP:     next_state = S_DEC_Y_POS_PRE;
+                                    LEFT:   next_state = S_DEC_X_POS_PRE;
+                                    DOWN:   next_state = S_INC_Y_POS_PRE;
+                                    RIGHT:  next_state = S_INC_X_POS_PRE;
                                     HOME:   next_state = S_START_LINE;
                                     END:    next_state = S_END_LINE;
-                                    
+                                    ENTER:  next_state = S_START_NEXT_LINE;
+                                    default: next_state = S_PLOT_CURSOR;
                                 endcase    
                             end
                             else
                             begin
                                 control_char = 1'b1;
-                                cursor_colour = 1'b0;
                                 next_state = S_PLOT_CURSOR;
                             end
                         end
             S_SAVE_CHAR:            next_state = S_SAVE_CHAR_WAIT;
             S_SAVE_CHAR_WAIT:       next_state = S_PLOT_PIXEL;
+            
             S_PLOT_PIXEL:           next_state = S_PLOT_WAIT;
             S_PLOT_WAIT:            next_state = S_INC_PIXEL;
             S_INC_PIXEL:            next_state = S_INC_PIXEL_WAIT;
-            S_INC_PIXEL_WAIT:       next_state = (pixel_counter_in <= CHAR_SIZE) ? S_PLOT_PIXEL : S_INC_X_POS;
+            S_INC_PIXEL_WAIT:       next_state = (pixel_counter_in <= CHAR_SIZE) ? S_PLOT_PIXEL : S_INC_X_POS_PRE;
+            
+            S_INC_X_POS_PRE:        next_state = (x_pos_counter_in < MAX_X_POS) ? S_INC_X_POS : S_START_NEXT_LINE;
             S_INC_X_POS:            next_state = S_INC_X_POS_WAIT;
-            S_INC_X_POS_WAIT:       next_state = (x_pos_counter_in <= MAX_X_POS) ? S_PLOT_CURSOR : S_START_NEXT_LINE;
+            S_INC_X_POS_WAIT:       next_state = S_PLOT_CURSOR;
+            
+            S_DEC_X_POS_PRE:        next_state = (x_pos_counter_in > 0) ? S_DEC_X_POS : S_END_PREV_LINE;
+            S_DEC_X_POS:            next_state = S_DEC_X_POS_WAIT;
+            S_DEC_X_POS_WAIT:       next_state = S_PLOT_CURSOR;
+            
+            S_INC_Y_POS_PRE:        next_state = (y_pos_counter_in < MAX_Y_POS) ? S_INC_Y_POS : S_SCROLL_DOWN;
             S_INC_Y_POS:            next_state = S_INC_Y_POS_WAIT;
-            S_INC_Y_POS_WAIT:       next_state = (y_pos_counter_in <= MAX_Y_POS) ? S_PLOT_CURSOR : S_START_NEXT_PAGE;
+            S_INC_Y_POS_WAIT:       next_state = S_PLOT_CURSOR;
+            
+            S_DEC_Y_POS_PRE:        next_state = (y_pos_counter_in > 0) ? S_DEC_Y_POS : S_SCROLL_UP;
+            S_DEC_Y_POS:            next_state = S_DEC_Y_POS_WAIT;
+            S_DEC_Y_POS_WAIT:       next_state = S_PLOT_CURSOR;
+            
+            S_START_LINE:           next_state = S_PLOT_CURSOR;
+            S_END_LINE:             next_state = S_PLOT_CURSOR;
+            S_START_NEXT_LINE:      next_state = S_INC_Y_POS_PRE;
+            S_END_PREV_LINE:        next_state = S_DEC_Y_POS_PRE;
+            
+            S_SCROLL_DOWN:          next_state = S_PLOT_CURSOR;
+            S_SCROLL_UP:            next_state = S_PLOT_CURSOR;
+            
             default:                next_state = S_PLOT_CURSOR;
         endcase
     end // state_table
@@ -424,12 +461,21 @@ module control_FSM(
     always @(negedge clk)
     begin: enable_signals
         plot = 1'b0;
+		  x_parallel = 1'b0;
+		  y_parallel = 1'b0;
         load_char = 1'b0;
+        inc_line_pos_counter = 1'b0;
+        dec_line_pos_counter = 1'b0;
+        reset_line_pos_counter = 1'b0;
+        line_parallel = 1'b0;
         inc_pixel_counter = 1'b0;
         reset_pixel_counter = 1'b0;
         inc_x_pos_counter = 1'b0;
+        dec_x_pos_counter = 1'b0;
         reset_x_pos_counter = 1'b0;
         inc_y_pos_counter = 1'b0;
+        dec_y_pos_counter = 1'b0;
+        y_load = 1'b0;
         reset_y_pos_counter = 1'b0;
         inc_cursor_pixel_counter = 1'b0;
         reset_cursor_pixel_counter = 1'b0;
@@ -437,20 +483,42 @@ module control_FSM(
             S_PLOT_CURSOR: 
                                     begin
                                         shift_for_cursor            = 1'b1;
-                                        plot                        = 1'b1;
+
                                     end
             S_CURSOR_INC:               inc_cursor_pixel_counter    = 1'b1;
             S_FLIP_CURSOR_COLOUR:       cursor_colour               = ~cursor_colour;
+            
+            S_CHECK_CHAR:           cursor_colour                   = 1'b0;
             S_SAVE_CHAR:
                                     begin
                                         load_char                   = 1'b1;
                                         reset_pixel_counter         = 1'b1;
                                         shift_for_cursor            = 1'b0;
                                     end
+                                    
             S_PLOT_PIXEL:               plot                        = 1'b1;
             S_INC_PIXEL:                inc_pixel_counter           = 1'b1;
+            
+            S_SCROLL_DOWN:              dec_line_pos_counter        = 1'b1;
+            S_SCROLL_UP:                inc_line_pos_counter        = 1'b1;
+            
+            S_START_NEXT_LINE:          reset_x_pos_counter         = 1'b1;
+            S_END_PREV_LINE:        begin
+                                        x_load                      = MAX_X_POS;
+                                        x_parallel                  = 1'b1;
+                                    end
+            
             S_INC_X_POS:                inc_x_pos_counter           = 1'b1;
             S_INC_Y_POS:                inc_y_pos_counter           = 1'b1;
+            S_DEC_X_POS:                dec_x_pos_counter           = 1'b1;
+            S_DEC_Y_POS:                dec_y_pos_counter           = 1'b1;
+            
+            S_START_LINE:               reset_x_pos_counter         = 1'b1;
+            S_END_LINE:             begin
+                                        x_load                      = MAX_X_POS;
+                                        x_parallel                  = 1'b1;
+                                    end
+            
         endcase
     end // enable_signals
     

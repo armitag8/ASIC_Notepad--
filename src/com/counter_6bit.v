@@ -15,15 +15,15 @@ module counter_6bit
 
     always @(posedge CLK)
     begin
-        if (increase == 1'b1 | decrease == 1'b1 | CLR == 1'b1 | parallel == 1'b1)
+        if (increase == 1'b1 || decrease == 1'b1 || CLR == 1'b1 || parallel == 1'b1)
         begin
             if (CLR == 1'b1)
                 Q_OUT[5:0] <= 6'b00_0000;
-            else if (CLK == 1'b1 & increase == 1'b1)
+            else if (CLK == 1'b1 && increase == 1'b1)
                Q_OUT[5:0] <= Q_OUT[5:0] + 6'b00_0001;
-            else if (CLK == 1'b1 & decrease == 1'b1)
+            else if (CLK == 1'b1 && decrease == 1'b1)
                Q_OUT[5:0] <= Q_OUT[5:0] - 6'b00_0001;
-            else if (CLK == 1'b1 & parallel == 1'b1)
+            else if (CLK == 1'b1 && parallel == 1'b1)
                Q_OUT[5:0] <= load[5:0];
         end
     end

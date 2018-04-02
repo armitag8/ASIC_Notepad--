@@ -75,7 +75,7 @@ always @*
             8'h71: ascii_code = 8'h7F;   // DEL: Delete
             8'h70: ascii_code = 8'h1A;   // SUB: Insert
             
-            default: ascii_code = 8'h2A; // *
+            default: ascii_code = 8'h00; // *
         endcase
         end
     else   // lowercase
@@ -147,7 +147,7 @@ always @*
             8'h71: ascii_code = 8'h7F;   // DEL: Delete
             8'h70: ascii_code = 8'h1A;   // SUB: Insert
             
-            default: ascii_code = 8'h2A; // *
+            default: ascii_code = 8'h00; // *
         endcase
         end
     end
