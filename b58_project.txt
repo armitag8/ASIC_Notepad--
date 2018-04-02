@@ -176,6 +176,10 @@ Quick Reference:
     We obtained usage permission directly from the author, Joey Conenna, vi email,
     dated March 14, 2018 between joe@armitage.com and embeddedthoughtsblog@gmail.com
 
+6. RAM Module:
+    We generated a RAM module (pages_RAM.v and pages_RAM.qip) using the Quartus Wizard
+    This design IP is under a free license from Intel/Altera, but was not integrated.
+
 
 
 Updates
@@ -223,4 +227,23 @@ Updates
             and the updates to key2ascii.v mentioned above.
             
         - We built RAM... (attrib, too)
+    
+    Week 3
+    ------
+        - We expanded the control FSM significantly (dozens more states) to handle the input of 
+            control characters. Our editor can now edit text. It responds to arrow keys, home,
+            end, and enter (this was redone for consistency with new logic). The backspace and
+            delete functions were built, but the addition of a temporary register necessary to
+            store and print a space, even though a different character was pressed, caused 
+            undefined behavior (Random lights on DE2, no VGA output, etc.)
+        
+        - We added a flashing cursor that indicates the current character position, using a 
+            rate divider and similar printing logic to the (printable) characters. However, we 
+            could not iron out all of the bugs int the allotted lab time and were unable to find
+            space in any of the other lab sessions.
+        
+        - Given our significant difficulties in this final week, we will not be implementing
+            multiple pages, scrolling, or making use of the RAM module in any such way. :(
+            We hope to fix basic text editing functions and a cursor in the Makerspace on 
+            Monday, before the presentation Tuesday.
             
