@@ -386,7 +386,8 @@ module control_FSM(
                 S_DEC_X_POS_WAIT        = 6'd32,
                 S_DEC_Y_POS_WAIT        = 6'd33,
                 S_BACKSPACE             = 6'd34,
-                S_DELETE                = 6'd35;
+                S_DELETE                = 6'd35,
+					 S_INC_PIXEL_POST			 = 6'd36;
 
     localparam  NULL        = 7'h00, // NULL
                 PGUP        = 7'h02, // STX
@@ -452,7 +453,8 @@ module control_FSM(
             S_PLOT_WAIT:            next_state = S_INC_PIXEL;
             S_INC_PIXEL:            next_state = S_INC_PIXEL_WAIT;
             S_INC_PIXEL_WAIT:       next_state = (pixel_counter_in <= CHAR_SIZE) ? S_PLOT_PIXEL : 
-                ( (backspace || delete) ? S_PLOT_CURSOR : S_INC_X_POS_PRE );
+                ( ((backspace == 1'b1) || (delete == 1'b1)) ? S_INC_PIXEL_POST : S_INC_X_POS_PRE );
+				S_INC_PIXEL_POST: 		next_state = S_PLOT_CURSOR;
 
             S_INC_X_POS_PRE:        next_state = (x_pos_counter_in < MAX_X_POS) ? S_INC_X_POS : S_START_NEXT_LINE;
             S_INC_X_POS:            next_state = S_INC_X_POS_WAIT;
@@ -460,7 +462,7 @@ module control_FSM(
 
             S_DEC_X_POS_PRE:        next_state = (x_pos_counter_in > 0) ? S_DEC_X_POS : S_END_PREV_LINE;
             S_DEC_X_POS:            next_state = S_DEC_X_POS_WAIT;
-            S_DEC_X_POS_WAIT:       next_state = backspace ? S_SAVE_CHAR : S_PLOT_CURSOR;
+            S_DEC_X_POS_WAIT:       next_state = (backspace == 1'b1) ? S_SAVE_CHAR : S_PLOT_CURSOR;
 
             S_INC_Y_POS_PRE:        next_state = (y_pos_counter_in < MAX_Y_POS) ? S_INC_Y_POS : S_SCROLL_DOWN;
             S_INC_Y_POS:            next_state = S_INC_Y_POS_WAIT;
@@ -468,7 +470,7 @@ module control_FSM(
 
             S_DEC_Y_POS_PRE:        next_state = (y_pos_counter_in > 0) ? S_DEC_Y_POS : S_SCROLL_UP;
             S_DEC_Y_POS:            next_state = S_DEC_Y_POS_WAIT;
-            S_DEC_Y_POS_WAIT:       next_state = backspace ? S_SAVE_CHAR : S_PLOT_CURSOR;
+            S_DEC_Y_POS_WAIT:       next_state = (backspace == 1'b1) ? S_SAVE_CHAR : S_PLOT_CURSOR;
 
             S_START_LINE:           next_state = S_PLOT_CURSOR;
             S_END_LINE:             next_state = S_PLOT_CURSOR;
@@ -523,21 +525,24 @@ module control_FSM(
                                     end
 
             S_CHECK_CHAR:           begin
-													 reset_pixel_counter  		  = 1'b1;
                                         cursor_colour               = 1'b0;
                                         reset_cursor_pixel_counter  = 1'b1;
-                                        backspace                   = 1'b0;
-                                        delete                      = 1'b0;
                                     end
 
             S_SAVE_CHAR:
                                     begin
-                                        load_char                   = 1'b1;
+													 reset_pixel_counter  		  = 1'b1;
+                                        reset_cursor_pixel_counter  = 1'b1;
                                         shift_for_cursor            = 1'b0;
                                     end
+				S_SAVE_CHAR_WAIT:			    load_char	                 = 1'b1;
 
             S_PLOT_PIXEL:               plot                        = 1'b1;
-            S_INC_PIXEL:                inc_pixel_counter           = 1'b1;
+            S_INC_PIXEL:            	 inc_pixel_counter           = 1'b1;
+				S_INC_PIXEL_POST:			begin
+													delete							  = 1'b0;
+													backspace						  = 1'b0;
+												end
 
             S_SCROLL_DOWN:              dec_line_pos_counter        = 1'b1;
             S_SCROLL_UP:                inc_line_pos_counter        = 1'b1;
