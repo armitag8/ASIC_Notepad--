@@ -1,6 +1,4 @@
 CSCB58 Project File: Winter 2018
-YOUTUBE: https://www.youtube.com/watch?v=FKi2u_n1GeI
-GITHUB: https://github.com/armitag8/ASIC_Notepad--
 
 Team Member A
 -------------
@@ -40,7 +38,7 @@ Project Description:
     An Application-Specific Integrated Circuit implementation of a rudimentary text-editor,
     without persistence, for use with a PS/2 keyboard and VGA monitor.
 
-Video URL: 
+Video URL: https://www.youtube.com/watch?v=FKi2u_n1GeI
 
 Code URL (please upload a copy of this file to your repository at the end of the project as well, 
 it will serve as a useful resource for future development): 
