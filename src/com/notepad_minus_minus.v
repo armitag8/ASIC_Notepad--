@@ -12,9 +12,27 @@ module notepad_minus_minus
         output VGA_SYNC_N,                          //    VGA SYNC
         output [9:0] VGA_R,                         //    VGA Red[9:0]
         output [9:0] VGA_G,                         //    VGA Green[9:0]
-        output [9:0] VGA_B                          //    VGA Blue[9:0]
+        output [9:0] VGA_B,                          //    VGA Blue[9:0]
+		  output [6:0] HEX0,
+		  output [6:0] HEX1,
+		  output [6:0] HEX2
     );
 
+	 
+	hex_display h0(
+	       .IN(pixel_counter_transfer[3:0]),
+	       .OUT(HEX0)
+	);
+	hex_display h1(
+	       .IN(pixel_counter_transfer[7:4]),
+	       .OUT(HEX1)
+	);
+	hex_display h2(
+	       .IN(line_pos_counter_transfer[3:0]),
+	       .OUT(HEX2)
+	);
+	 
+	 
     wire resetn;
     assign resetn = KEY[0];
 
@@ -269,7 +287,7 @@ module datapath
 
     always @(negedge clk)
     begin: colour_activator
-        if (top_shifter_bit || plot_cursor)
+        if (letter_in > 7'h1F && letter_in < 7'h7F && (top_shifter_bit || plot_cursor))
             colour_out = colour_in;
         else
             colour_out = 3'b000;
@@ -282,7 +300,7 @@ module datapath
             y_out = (y_pos_counter << 4) + 4'd13;
             x_out = (x_pos_counter << 3) + cursor_pixel_counter;
           end
-        else if (~inc_pixel_counter)
+        if (~inc_pixel_counter)
         begin
             x_out = (x_pos_counter << 3) + pixel_counter[2:0];
             y_out = (y_pos_counter << 4) + pixel_counter[6:3];
@@ -544,8 +562,8 @@ module control_FSM(
 													backspace						  = 1'b0;
 												end
 
-            S_SCROLL_DOWN:              dec_line_pos_counter        = 1'b1;
-            S_SCROLL_UP:                inc_line_pos_counter        = 1'b1;
+            S_SCROLL_DOWN:              inc_line_pos_counter        = 1'b1;
+            S_SCROLL_UP:                dec_line_pos_counter        = 1'b1;
 
             S_START_NEXT_LINE:          reset_x_pos_counter         = 1'b1;
             S_END_PREV_LINE:        begin
@@ -564,8 +582,15 @@ module control_FSM(
                                         x_parallel                  = 1'b1;
                                     end
 
-            S_BACKSPACE:                backspace                   = 1'b1;
-            S_DELETE:                   delete                      = 1'b1;
+            S_BACKSPACE:             begin
+													backspace                   = 1'b1;
+													reset_pixel_counter 			= 1'b1;
+												end
+            S_DELETE:                begin
+	                             			delete                      = 1'b1;
+													shift_for_cursor            = 1'b0;
+													reset_pixel_counter 			= 1'b1;
+												end
 
         endcase
     end // enable_signals
