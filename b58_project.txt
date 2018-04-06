@@ -46,7 +46,6 @@ it will serve as a useful resource for future development):
     Note: all code in production in src/com; deprecated, reference & test code in src/ext
  
 
-
 Proposal
 --------
 
@@ -225,7 +224,7 @@ Updates
             keyboards. This required both the creation of additional bitmaps (in char_decoder.v)
             and the updates to key2ascii.v mentioned above.
             
-        - We built RAM... (attrib, too)
+        - We built RAM in order to use for storage of multiple pages of characters.
     
     Week 3
     ------
@@ -244,5 +243,13 @@ Updates
         - Given our significant difficulties in this final week, we will not be implementing
             multiple pages, scrolling, or making use of the RAM module in any such way. :(
             We hope to fix basic text editing functions and a cursor in the Makerspace on 
-            Monday, before the presentation Tuesday.
-            
+            Monday, before the presentation Tuesday. We do have most of the FSM signals,
+            counters other measures prepared for the introduction of RAM, and they will remain 
+            in case future students choose to work from this point.
+    
+    Week 4
+    ------
+        - We succeeded in both creating the flashing cursor and in implementing backspace and delete
+            functions; however, each of these features interfered with one another. The final version
+            in the repo has the more function improvement (delete) and prior revisions have a working
+            flashing cursor that does 'leave bits behind' when control characters are pressed.
