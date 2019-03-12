@@ -5,7 +5,7 @@ module kb_tester
         output [0:0] LEDR,
         output [0:0] LEDG,
         input CLOCK_50,
-        input PS2_CLK,
+        input PS2_KBCLK,
         input PS2_KBDAT,
         input [0:0] KEY
     );
@@ -17,9 +17,9 @@ module kb_tester
     keyboard k0
         (
             .clk(CLOCK_50),
-            .reset(KEY[0]),
+            .reset(~KEY[0]),
             .ps2d(PS2_KBDAT),
-            .ps2c(PS2_CLK),
+            .ps2c(PS2_KBCLK),
             .scan_code(kb_scan_code),
             .scan_code_ready(kb_scan_ready),
             .letter_case_out(kb_upper_case_flag)            
